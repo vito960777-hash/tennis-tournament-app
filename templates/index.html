@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tennis">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#667eea">
+    <title>ATP Finals Tournament</title>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🎾 ATP Finals Tournament</h1>
+                <p class="subtitle">Тенісний турнір в стилі ATP Finals</p>
+            </div>
+            <div class="header-buttons">
+                <button id="adminLoginBtn" class="btn btn-secondary">Адмін вхід</button>
+                <button id="adminLogoutBtn" class="btn btn-secondary" style="display:none;">Вихід</button>
+                <button id="newTournamentBtn" class="btn btn-primary" style="display:none;">Новий турнір</button>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="groups">Групи</button>
+            <button class="tab-btn" data-tab="schedule">Розклад</button>
+            <button class="tab-btn" data-tab="playoffs">Плей-офф</button>
+            <button class="tab-btn" data-tab="results">Результати</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Groups Tab -->
+            <div id="groups-tab" class="tab-pane active">
+                <div class="groups-container">
+                    <div class="group-card" id="group-a">
+                        <h2 class="group-title">Група A</h2>
+                        <div class="table-container">
+                            <table class="standings-table">
+                                <thead>
+                                    <tr>
+                                        <th>Гравець</th>
+                                        <th>Рівень</th>
+                                        <th>В</th>
+                                        <th>П</th>
+                                        <th>Геймі</th>
+                                        <th>Різниця</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="group-a-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="group-card" id="group-b">
+                        <h2 class="group-title">Група B</h2>
+                        <div class="table-container">
+                            <table class="standings-table">
+                                <thead>
+                                    <tr>
+                                        <th>Гравець</th>
+                                        <th>Рівень</th>
+                                        <th>В</th>
+                                        <th>П</th>
+                                        <th>Геймі</th>
+                                        <th>Різниця</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="group-b-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group Matches -->
+                <div class="matches-section">
+                    <h2 class="section-title">Матчі групового етапу</h2>
+                    <div id="group-matches" class="matches-grid">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule Tab -->
+            <div id="schedule-tab" class="tab-pane">
+                <h2 class="section-title">Повний розклад турніру</h2>
+                <div id="full-schedule" class="schedule-container">
+                </div>
+            </div>
+
+            <!-- Playoffs Tab -->
+            <div id="playoffs-tab" class="tab-pane">
+                <div class="playoffs-info">
+                    <p class="info-text">Плей-офф стане доступним після завершення всіх групових матчів</p>
+                    <button id="setupPlayoffsBtn" class="btn btn-secondary" disabled>Налаштувати плей-офф</button>
+                </div>
+
+                <div id="playoffs-matches" class="matches-grid">
+                </div>
+            </div>
+
+            <!-- Results Tab -->
+            <div id="results-tab" class="tab-pane">
+                <div class="results-container">
+                    <h2 class="section-title">Підсумки турніру</h2>
+                    <div id="final-results" class="podium">
+                        <p class="info-text">Результати з'являться після завершення турніру</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <span class="close-admin">&times;</span>
+            <h2 class="modal-title">Адмін вхід</h2>
+            <p class="hint-text">Введіть пароль адміністратора</p>
+            <div class="admin-input">
+                <input type="password" id="adminPassword" placeholder="Пароль">
+            </div>
+            <button id="submitAdminBtn" class="btn btn-primary">Увійти</button>
+        </div>
+    </div>
+
+    <!-- Match Result Modal -->
+    <div id="matchModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 class="modal-title">Введіть результат матчу</h2>
+            <div class="match-info">
+                <p id="matchPlayers"></p>
+            </div>
+            <div class="score-input">
+                <input type="number" id="player1Score" min="0" max="7" placeholder="0" inputmode="numeric" pattern="[0-7]">
+                <span class="score-separator">-</span>
+                <input type="number" id="player2Score" min="0" max="7" placeholder="0" inputmode="numeric" pattern="[0-7]">
+            </div>
+            <p class="hint-text">Валідні рахунки: 6-0, 6-1, 6-2, 6-3, 6-4, 7-5, 7-6 (і навпаки)</p>
+            <button id="submitScoreBtn" class="btn btn-primary">Зберегти результат</button>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
