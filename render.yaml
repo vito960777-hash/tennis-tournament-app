@@ -1,11 +1,11 @@
 services:
   - type: web
     name: tennis-tournament
-    env: python
+    runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
-      - key: SECRET_KEY
-        generateValue: true
-      - key: ADMIN_PASSWORD
-        value: tennis2024
+      - key: PYTHON_VERSION
+        value: 3.13.0
+      - key: PORT
+        value: 10000

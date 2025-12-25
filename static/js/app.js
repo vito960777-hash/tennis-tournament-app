@@ -144,7 +144,7 @@ async function adminLogin() {
     const password = adminPassword.value;
 
     if (!password) {
-        showNotification('Введіть пароль', 'error');
+        showNotification('Enter password', 'error');
         return;
     }
 
@@ -163,13 +163,13 @@ async function adminLogin() {
             isAdmin = true;
             adminModal.style.display = 'none';
             adminPassword.value = '';
-            showNotification('Ви увійшли як адміністратор', 'success');
+            showNotification('Logged in as admin', 'success');
             updateAdminUI();
         } else {
-            showNotification(data.message || 'Невірний пароль', 'error');
+            showNotification(data.message || 'Invalid password', 'error');
         }
     } catch (error) {
-        showNotification('Помилка при вході', 'error');
+        showNotification('Login error', 'error');
         console.error(error);
     }
 }
@@ -181,7 +181,7 @@ async function adminLogout() {
         });
 
         isAdmin = false;
-        showNotification('Ви вийшли', 'success');
+        showNotification('Logged out', 'success');
         updateAdminUI();
     } catch (error) {
         console.error('Error logging out:', error);
@@ -193,10 +193,16 @@ function updateAdminUI() {
         adminLoginBtn.style.display = 'none';
         adminLogoutBtn.style.display = 'block';
         newTournamentBtn.style.display = 'block';
+        if (registerPlayerBtn) {
+            registerPlayerBtn.style.display = 'block';
+        }
     } else {
         adminLoginBtn.style.display = 'block';
         adminLogoutBtn.style.display = 'none';
         newTournamentBtn.style.display = 'none';
+        if (registerPlayerBtn) {
+            registerPlayerBtn.style.display = 'none';
+        }
     }
 }
 
@@ -223,6 +229,8 @@ function switchTab(tabName) {
         loadPlayoffs();
     } else if (tabName === 'results') {
         loadResults();
+    } else if (tabName === 'rating') {
+        loadRating();
     }
 }
 
@@ -236,12 +244,12 @@ async function createNewTournament() {
         const data = await response.json();
 
         if (data.success) {
-            showNotification('Турнір створено успішно!', 'success');
+            showNotification('Tournament created successfully!', 'success');
             loadTournamentInfo();
             loadSchedule();
         }
     } catch (error) {
-        showNotification('Помилка при створенні турніру', 'error');
+        showNotification('Error creating tournament', 'error');
         console.error(error);
     }
 }
@@ -331,7 +339,7 @@ function renderGroupMatches(matches) {
         // Create round header
         const roundHeader = document.createElement('div');
         roundHeader.className = 'round-header';
-        roundHeader.innerHTML = `<h3>Раунд ${round.number}</h3>`;
+        roundHeader.innerHTML = `<h3>Round ${round.number}</h3>`;
         container.appendChild(roundHeader);
 
         // Render each group in the round
@@ -339,7 +347,7 @@ function renderGroupMatches(matches) {
             // Filter matches for this time slot and group
             const groupMatches = matches.filter(match =>
                 match.time === groupInfo.time &&
-                match.stage === `Група ${groupInfo.name}`
+                match.stage === `Group ${groupInfo.name}`
             );
 
             if (groupMatches.length > 0) {
@@ -347,7 +355,7 @@ function renderGroupMatches(matches) {
                 const groupSubheader = document.createElement('div');
                 groupSubheader.className = 'group-subheader';
                 groupSubheader.innerHTML = `
-                    <span class="group-label">Група ${groupInfo.name}</span>
+                    <span class="group-label">Group ${groupInfo.name}</span>
                     <span class="time-label">⏰ ${groupInfo.time}</span>
                 `;
                 container.appendChild(groupSubheader);
@@ -373,14 +381,14 @@ function createMatchCard(match, type) {
     const card = document.createElement('div');
     card.className = `match-card ${match.played ? 'played' : ''} ${isAdmin ? 'admin-mode' : ''}`;
 
-    // Дозволяємо редагувати тільки адмінам
+    // Allow admins to edit only
     if (isAdmin) {
         card.addEventListener('click', () => openMatchModal(match, type));
     }
 
     const statusBadge = match.played
-        ? `<span class="match-status completed">✓ Зіграно${isAdmin ? ' (клік для редагування)' : ''}</span>`
-        : `<span class="match-status pending">Очікує</span>`;
+        ? `<span class="match-status completed">✓ Played${isAdmin ? ' (click to edit)' : ''}</span>`
+        : `<span class="match-status pending">Pending</span>`;
 
     const scoreDisplay = match.score
         ? `<div class="match-score">${match.score[0]} - ${match.score[1]}</div>`
@@ -389,7 +397,7 @@ function createMatchCard(match, type) {
     card.innerHTML = `
         <div class="match-header">
             <span class="match-time">⏰ ${match.time}</span>
-            <span class="match-court">Корт ${match.court}</span>
+            <span class="match-court">Court ${match.court}</span>
         </div>
         <div class="match-players">${match.player1} vs ${match.player2}</div>
         ${scoreDisplay}
@@ -429,7 +437,7 @@ function renderSchedule(schedule) {
     if (groupMatches.length > 0) {
         const groupStageHeader = document.createElement('div');
         groupStageHeader.className = 'stage-header';
-        groupStageHeader.innerHTML = '<h2>🎄 ГРУПОВИЙ ЕТАП</h2>';
+        groupStageHeader.innerHTML = '<h2>🎄 GROUP STAGE</h2>';
         container.appendChild(groupStageHeader);
 
         // Define rounds
@@ -464,14 +472,14 @@ function renderSchedule(schedule) {
 
             const roundHeader = document.createElement('div');
             roundHeader.className = 'round-header-schedule';
-            roundHeader.innerHTML = `<h3>Раунд ${round.number}</h3>`;
+            roundHeader.innerHTML = `<h3>Round ${round.number}</h3>`;
             roundDiv.appendChild(roundHeader);
 
             // Render each group in the round
             round.groups.forEach(groupInfo => {
                 const groupMatches = schedule.filter(match =>
                     match.time === groupInfo.time &&
-                    match.stage === `Група ${groupInfo.name}`
+                    match.stage === `Group ${groupInfo.name}`
                 );
 
                 if (groupMatches.length > 0) {
@@ -480,7 +488,7 @@ function renderSchedule(schedule) {
 
                     const header = document.createElement('div');
                     header.className = 'time-slot-header';
-                    header.innerHTML = `⏰ ${groupInfo.time} - Група ${groupInfo.name}`;
+                    header.innerHTML = `⏰ ${groupInfo.time} - Group ${groupInfo.name}`;
                     timeSlotDiv.appendChild(header);
 
                     const matchesDiv = document.createElement('div');
@@ -504,7 +512,7 @@ function renderSchedule(schedule) {
     if (playoffMatches.length > 0) {
         const playoffHeader = document.createElement('div');
         playoffHeader.className = 'stage-header';
-        playoffHeader.innerHTML = '<h2>⭐ ПЛЕЙ-ОФФ</h2>';
+        playoffHeader.innerHTML = '<h2>⭐ PLAYOFFS</h2>';
         container.appendChild(playoffHeader);
 
         // Group playoff matches by time
@@ -579,7 +587,7 @@ function renderPlayoffMatches(matches) {
     if (semifinals.length > 0) {
         const title = document.createElement('h3');
         title.className = 'section-title';
-        title.textContent = '🎾 Півфінали';
+        title.textContent = '🎾 Semifinals';
         container.appendChild(title);
 
         semifinals.forEach(match => {
@@ -591,7 +599,7 @@ function renderPlayoffMatches(matches) {
     if (finals.length > 0 || thirdPlace.length > 0) {
         const title = document.createElement('h3');
         title.className = 'section-title';
-        title.textContent = '🏆 Фінальні матчі';
+        title.textContent = '🏆 Final Matches';
         container.appendChild(title);
 
         [...thirdPlace, ...finals].forEach(match => {
@@ -606,14 +614,14 @@ function createPlayoffMatchCard(match) {
     const card = document.createElement('div');
     card.className = `match-card ${match.played ? 'played' : ''} ${isAdmin ? 'admin-mode' : ''}`;
 
-    // Дозволяємо редагувати тільки адмінам
+    // Allow admins to edit only
     if (isAdmin) {
         card.addEventListener('click', () => openPlayoffMatchModal(match));
     }
 
     const statusBadge = match.played
-        ? `<span class="match-status completed">✓ Зіграно${isAdmin ? ' (клік для редагування)' : ''}</span>`
-        : `<span class="match-status pending">Очікує</span>`;
+        ? `<span class="match-status completed">✓ Played${isAdmin ? ' (click to edit)' : ''}</span>`
+        : `<span class="match-status pending">Pending</span>`;
 
     const scoreDisplay = match.score
         ? `<div class="match-score">${match.score[0]} - ${match.score[1]}</div>`
@@ -622,7 +630,7 @@ function createPlayoffMatchCard(match) {
     card.innerHTML = `
         <div class="match-header">
             <span class="match-time">⏰ ${match.time}</span>
-            <span class="match-court">Корт ${match.court}</span>
+            <span class="match-court">Court ${match.court}</span>
         </div>
         <div style="font-size: 0.9rem; color: #667eea; font-weight: 600; margin-bottom: 0.5rem;">
             ${match.stage}
@@ -645,13 +653,13 @@ async function setupPlayoffs() {
         const data = await response.json();
 
         if (data.success) {
-            showNotification('Плей-офф налаштовано!', 'success');
+            showNotification('Playoffs set up!', 'success');
             switchTab('playoffs');
         } else {
-            showNotification(data.error || 'Помилка', 'error');
+            showNotification(data.error || 'Error', 'error');
         }
     } catch (error) {
-        showNotification('Помилка при налаштуванні плей-офф', 'error');
+        showNotification('Error setting up playoffs', 'error');
         console.error(error);
     }
 }
@@ -660,18 +668,18 @@ async function setupPlayoffs() {
 function openMatchModal(match, type) {
     currentMatch = { ...match, type };
 
-    // Оновлюємо заголовок залежно від стану матчу
+    // Update title based on match status
     const modalTitle = document.querySelector('.modal-title');
     if (match.score) {
-        modalTitle.textContent = 'Редагувати результат матчу';
+        modalTitle.textContent = 'Edit Match Result';
     } else {
-        modalTitle.textContent = 'Введіть результат матчу';
+        modalTitle.textContent = 'Enter Match Result';
     }
 
     document.getElementById('matchPlayers').textContent =
         `${match.player1} vs ${match.player2}`;
 
-    // Якщо є існуючий рахунок, показуємо його
+    // If there's an existing score, show it
     const p1Input = document.getElementById('player1Score');
     const p2Input = document.getElementById('player2Score');
 
@@ -697,18 +705,18 @@ function openMatchModal(match, type) {
 function openPlayoffMatchModal(match) {
     currentMatch = { ...match, type: 'playoff' };
 
-    // Оновлюємо заголовок залежно від стану матчу
+    // Update title based on match status
     const modalTitle = document.querySelector('.modal-title');
     if (match.score) {
-        modalTitle.textContent = 'Редагувати результат матчу';
+        modalTitle.textContent = 'Edit Match Result';
     } else {
-        modalTitle.textContent = 'Введіть результат матчу';
+        modalTitle.textContent = 'Enter Match Result';
     }
 
     document.getElementById('matchPlayers').textContent =
         `${match.stage}: ${match.player1} vs ${match.player2}`;
 
-    // Якщо є існуючий рахунок, показуємо його
+    // If there's an existing score, show it
     const p1Input = document.getElementById('player1Score');
     const p2Input = document.getElementById('player2Score');
 
@@ -736,7 +744,7 @@ async function submitScore() {
     const p2Score = parseInt(document.getElementById('player2Score').value);
 
     if (isNaN(p1Score) || isNaN(p2Score)) {
-        showNotification('Введіть обидва рахунки', 'error');
+        showNotification('Enter both scores', 'error');
         return;
     }
 
@@ -784,10 +792,10 @@ async function submitScore() {
                 loadTournamentInfo();
             }
         } else {
-            showNotification(data.error || 'Помилка', 'error');
+            showNotification(data.error || 'Error', 'error');
         }
     } catch (error) {
-        showNotification('Помилка при збереженні результату', 'error');
+        showNotification('Error saving result', 'error');
         console.error(error);
     }
 }
@@ -816,25 +824,25 @@ function renderResults(results) {
     container.innerHTML = `
         <div class="podium-place first">
             <div class="podium-medal">🥇</div>
-            <div class="podium-rank">Чемпіон</div>
+            <div class="podium-rank">Champion</div>
             <div class="podium-name">${results.champion}</div>
         </div>
         <div class="podium-place second">
             <div class="podium-medal">🥈</div>
-            <div class="podium-rank">2-е місце</div>
+            <div class="podium-rank">2nd place</div>
             <div class="podium-name">${results.runner_up}</div>
         </div>
         ${results.third_place ? `
         <div class="podium-place third">
             <div class="podium-medal">🥉</div>
-            <div class="podium-rank">3-є місце</div>
+            <div class="podium-rank">3rd place</div>
             <div class="podium-name">${results.third_place}</div>
         </div>
         ` : ''}
         ${results.fourth_place ? `
         <div class="podium-place">
             <div class="podium-medal">4️⃣</div>
-            <div class="podium-rank">4-е місце</div>
+            <div class="podium-rank">4th place</div>
             <div class="podium-name">${results.fourth_place}</div>
         </div>
         ` : ''}
@@ -851,3 +859,300 @@ function showNotification(message, type = 'success') {
         notification.style.display = 'none';
     }, 3000);
 }
+
+// ===== Rating System =====
+
+// DOM elements for rating
+const registerPlayerBtn = document.getElementById('registerPlayerBtn');
+const registerModal = document.getElementById('registerModal');
+const closeRegister = document.querySelector('.close-register');
+const submitPlayerBtn = document.getElementById('submitPlayerBtn');
+const playerNameInput = document.getElementById('playerName');
+const playerLevelInput = document.getElementById('playerLevel');
+
+// Load player ratings
+async function loadRating() {
+    try {
+        const response = await fetch('/api/players');
+        const data = await response.json();
+
+        renderRating(data.players);
+    } catch (error) {
+        console.error('Error loading ratings:', error);
+        document.getElementById('rating-body').innerHTML = `
+            <tr>
+                <td colspan="8" class="info-text">Error loading rating</td>
+            </tr>
+        `;
+    }
+}
+
+// Render rating table
+function renderRating(players) {
+    const tbody = document.getElementById('rating-body');
+
+    if (!players || players.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="info-text">No registered players</td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = '';
+
+    players.forEach((player, index) => {
+        const rank = index + 1;
+        const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
+        const winRate = player.total_wins + player.total_losses > 0
+            ? Math.round((player.total_wins / (player.total_wins + player.total_losses)) * 100)
+            : 0;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><span class="rank-medal">${medal}</span>${rank}</td>
+            <td class="player-name">${player.name}</td>
+            <td class="rating-value">${player.rating}</td>
+            <td>${player.level}</td>
+            <td>${player.total_wins}-${player.total_losses}</td>
+            <td>${winRate}%</td>
+            <td>
+                ${isAdmin ? `
+                    <button class="edit-btn" onclick="openEditPlayerModal('${player.name}', ${player.level}, ${player.rating})">Edit</button>
+                    <button class="delete-btn" onclick="deletePlayer('${player.name}')">Delete</button>
+                ` : ''}
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Register new player
+async function registerPlayer() {
+    const name = playerNameInput.value.trim();
+    const level = parseInt(playerLevelInput.value);
+
+    if (!name) {
+        showNotification('Enter player name', 'error');
+        return;
+    }
+
+    if (level < 1 || level > 10) {
+        showNotification('Level must be between 1 and 10', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/players', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name, level }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification(`Player ${name} registered!`, 'success');
+            registerModal.style.display = 'none';
+            playerNameInput.value = '';
+            playerLevelInput.value = 1;
+            loadRating();
+        } else {
+            showNotification(data.error || 'Registration error', 'error');
+        }
+    } catch (error) {
+        showNotification('Error registering player', 'error');
+        console.error(error);
+    }
+}
+
+// Delete player
+async function deletePlayer(name) {
+    if (!confirm(`Delete player ${name}?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/players/${encodeURIComponent(name)}`, {
+            method: 'DELETE',
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification(`Player ${name} deleted`, 'success');
+            loadRating();
+        } else {
+            showNotification(data.error || 'Error deleting', 'error');
+        }
+    } catch (error) {
+        showNotification('Error deleting player', 'error');
+        console.error(error);
+    }
+}
+
+// Event listeners for rating modal
+if (registerPlayerBtn) {
+    registerPlayerBtn.addEventListener('click', () => {
+        registerModal.style.display = 'flex';
+        setTimeout(() => playerNameInput.focus(), 100);
+    });
+}
+
+if (closeRegister) {
+    closeRegister.addEventListener('click', () => {
+        registerModal.style.display = 'none';
+    });
+}
+
+if (submitPlayerBtn) {
+    submitPlayerBtn.addEventListener('click', registerPlayer);
+}
+
+// Close modal on outside click
+registerModal.addEventListener('click', (e) => {
+    if (e.target === registerModal) {
+        registerModal.style.display = 'none';
+    }
+});
+
+// Enter key to submit
+playerNameInput?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        registerPlayer();
+    }
+});
+
+playerLevelInput?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        registerPlayer();
+    }
+});
+
+// ===== Edit Player Functionality =====
+
+// DOM elements for edit player modal
+const editPlayerModal = document.getElementById('editPlayerModal');
+const closeEditPlayer = document.querySelector('.close-edit-player');
+const submitEditPlayerBtn = document.getElementById('submitEditPlayerBtn');
+const editPlayerNameInput = document.getElementById('editPlayerName');
+const editPlayerLevelInput = document.getElementById('editPlayerLevel');
+const editPlayerRatingInput = document.getElementById('editPlayerRating');
+
+// Store original values to detect changes
+let originalPlayerData = {
+    level: null,
+    rating: null
+};
+
+// Open edit player modal
+function openEditPlayerModal(name, level, rating) {
+    editPlayerNameInput.value = name;
+    editPlayerLevelInput.value = level;
+    editPlayerRatingInput.value = rating;
+
+    // Store original values
+    originalPlayerData.level = level;
+    originalPlayerData.rating = rating;
+
+    editPlayerModal.style.display = 'flex';
+    setTimeout(() => editPlayerLevelInput.focus(), 100);
+}
+
+// Update player data
+async function updatePlayer() {
+    const name = editPlayerNameInput.value.trim();
+    const level = parseFloat(editPlayerLevelInput.value);
+    const rating = parseInt(editPlayerRatingInput.value);
+
+    if (!name) {
+        showNotification('Player name is missing', 'error');
+        return;
+    }
+
+    // Build update object with only changed fields
+    const updateData = {};
+    let hasChanges = false;
+
+    // Check if level has changed
+    if (level !== originalPlayerData.level) {
+        if (isNaN(level) || level < 1 || level > 10) {
+            showNotification('Level must be between 1 and 10', 'error');
+            return;
+        }
+        updateData.level = level;
+        hasChanges = true;
+    }
+
+    // Check if rating has changed
+    if (rating !== originalPlayerData.rating) {
+        if (isNaN(rating) || rating < 0) {
+            showNotification('Rating must be a positive number', 'error');
+            return;
+        }
+        updateData.rating = rating;
+        hasChanges = true;
+    }
+
+    if (!hasChanges) {
+        showNotification('No changes detected', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/players/${encodeURIComponent(name)}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updateData),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification(`Player ${name} updated!`, 'success');
+            editPlayerModal.style.display = 'none';
+            loadRating();
+        } else {
+            showNotification(data.error || 'Error updating player', 'error');
+        }
+    } catch (error) {
+        showNotification('Error updating player', 'error');
+        console.error(error);
+    }
+}
+
+// Event listeners for edit player modal
+if (closeEditPlayer) {
+    closeEditPlayer.addEventListener('click', () => {
+        editPlayerModal.style.display = 'none';
+    });
+}
+
+if (submitEditPlayerBtn) {
+    submitEditPlayerBtn.addEventListener('click', updatePlayer);
+}
+
+// Close modal on outside click
+editPlayerModal?.addEventListener('click', (e) => {
+    if (e.target === editPlayerModal) {
+        editPlayerModal.style.display = 'none';
+    }
+});
+
+// Enter key to submit
+editPlayerLevelInput?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        updatePlayer();
+    }
+});
+
+editPlayerRatingInput?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        updatePlayer();
+    }
+});

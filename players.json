@@ -1,0 +1,74 @@
+{
+  "Oleksandr": {
+    "name": "Oleksandr",
+    "level": 4,
+    "rating": 1000,
+    "tournaments_played": 19,
+    "total_wins": 0,
+    "total_losses": 0,
+    "registered_date": "2025-12-25T20:03:30.322185"
+  },
+  "Igor": {
+    "name": "Igor",
+    "level": 4,
+    "rating": 1000,
+    "tournaments_played": 19,
+    "total_wins": 0,
+    "total_losses": 0,
+    "registered_date": "2025-12-25T20:03:30.322878"
+  },
+  "Viktor": {
+    "name": "Viktor",
+    "level": 3,
+    "rating": 1000,
+    "tournaments_played": 19,
+    "total_wins": 0,
+    "total_losses": 0,
+    "registered_date": "2025-12-25T20:03:30.323979"
+  },
+  "Oleksiy": {
+    "name": "Oleksiy",
+    "level": 4,
+    "rating": 1000,
+    "tournaments_played": 19,
+    "total_wins": 0,
+    "total_losses": 0,
+    "registered_date": "2025-12-25T20:03:30.324207"
+  },
+  "Oleg": {
+    "name": "Oleg",
+    "level": 3.5,
+    "rating": 1000,
+    "tournaments_played": 19,
+    "total_wins": 0,
+    "total_losses": 0,
+    "registered_date": "2025-12-25T20:03:30.324390"
+  },
+  "Vito": {
+    "name": "Vito",
+    "level": 3.5,
+    "rating": 1000,
+    "tournaments_played": 19,
+    "total_wins": 0,
+    "total_losses": 0,
+    "registered_date": "2025-12-25T20:03:30.324561"
+  },
+  "Yaroslav": {
+    "name": "Yaroslav",
+    "level": 3.5,
+    "rating": 1000,
+    "tournaments_played": 19,
+    "total_wins": 0,
+    "total_losses": 0,
+    "registered_date": "2025-12-25T20:03:30.324757"
+  },
+  "Prinston": {
+    "name": "Prinston",
+    "level": 3,
+    "rating": 1000,
+    "tournaments_played": 13,
+    "total_wins": 0,
+    "total_losses": 0,
+    "registered_date": "2025-12-25T21:08:19.055425"
+  }
+}

@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Дананг 2025">
+    <meta name="apple-mobile-web-app-title" content="Danang 2025">
     <meta name="format-detection" content="telephone=no">
     <meta name="theme-color" content="#c41e3a">
-    <title>Новорічний Турнір Дананг 2025</title>
+    <title>New Year Tournament Danang 2025</title>
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,22 +20,23 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <h1>🎄 Новорічний Турнір Дананг 2025 ⛄</h1>
-                <p class="subtitle">Святковий тенісний турнір у В'єтнамі</p>
+                <h1>🎄 New Year Tournament Danang 2025 ⛄</h1>
+                <p class="subtitle">Festive Tennis Tournament in Vietnam</p>
             </div>
             <div class="header-buttons">
-                <button id="adminLoginBtn" class="btn btn-secondary">Адмін вхід</button>
-                <button id="adminLogoutBtn" class="btn btn-secondary" style="display:none;">Вихід</button>
-                <button id="newTournamentBtn" class="btn btn-primary" style="display:none;">Новий турнір</button>
+                <button id="adminLoginBtn" class="btn btn-secondary">Admin Login</button>
+                <button id="adminLogoutBtn" class="btn btn-secondary" style="display:none;">Logout</button>
+                <button id="newTournamentBtn" class="btn btn-primary" style="display:none;">New Tournament</button>
             </div>
         </header>
 
         <!-- Navigation Tabs -->
         <div class="tabs">
-            <button class="tab-btn active" data-tab="groups">Групи</button>
-            <button class="tab-btn" data-tab="schedule">Розклад</button>
-            <button class="tab-btn" data-tab="playoffs">Плей-офф</button>
-            <button class="tab-btn" data-tab="results">Результати</button>
+            <button class="tab-btn active" data-tab="groups">Groups</button>
+            <button class="tab-btn" data-tab="schedule">Schedule</button>
+            <button class="tab-btn" data-tab="playoffs">Playoffs</button>
+            <button class="tab-btn" data-tab="results">Results</button>
+            <button class="tab-btn" data-tab="rating">⭐ Rating</button>
         </div>
 
         <!-- Tab Content -->
@@ -44,17 +45,17 @@
             <div id="groups-tab" class="tab-pane active">
                 <div class="groups-container">
                     <div class="group-card" id="group-a">
-                        <h2 class="group-title">Група A</h2>
+                        <h2 class="group-title">Group A</h2>
                         <div class="table-container">
                             <table class="standings-table">
                                 <thead>
                                     <tr>
-                                        <th>Гравець</th>
-                                        <th>Рівень</th>
-                                        <th>В</th>
-                                        <th>П</th>
-                                        <th>Геймі</th>
-                                        <th>Різниця</th>
+                                        <th>Player</th>
+                                        <th>Level</th>
+                                        <th>W</th>
+                                        <th>L</th>
+                                        <th>Games</th>
+                                        <th>Diff</th>
                                     </tr>
                                 </thead>
                                 <tbody id="group-a-body">
@@ -64,17 +65,17 @@
                     </div>
 
                     <div class="group-card" id="group-b">
-                        <h2 class="group-title">Група B</h2>
+                        <h2 class="group-title">Group B</h2>
                         <div class="table-container">
                             <table class="standings-table">
                                 <thead>
                                     <tr>
-                                        <th>Гравець</th>
-                                        <th>Рівень</th>
-                                        <th>В</th>
-                                        <th>П</th>
-                                        <th>Геймі</th>
-                                        <th>Різниця</th>
+                                        <th>Player</th>
+                                        <th>Level</th>
+                                        <th>W</th>
+                                        <th>L</th>
+                                        <th>Games</th>
+                                        <th>Diff</th>
                                     </tr>
                                 </thead>
                                 <tbody id="group-b-body">
@@ -86,7 +87,7 @@
 
                 <!-- Group Matches -->
                 <div class="matches-section">
-                    <h2 class="section-title">Матчі групового етапу</h2>
+                    <h2 class="section-title">Group Stage Matches</h2>
                     <div id="group-matches" class="matches-grid">
                     </div>
                 </div>
@@ -94,7 +95,7 @@
 
             <!-- Schedule Tab -->
             <div id="schedule-tab" class="tab-pane">
-                <h2 class="section-title">Повний розклад турніру</h2>
+                <h2 class="section-title">Full Tournament Schedule</h2>
                 <div id="full-schedule" class="schedule-container">
                 </div>
             </div>
@@ -102,8 +103,8 @@
             <!-- Playoffs Tab -->
             <div id="playoffs-tab" class="tab-pane">
                 <div class="playoffs-info">
-                    <p class="info-text">Плей-офф стане доступним після завершення всіх групових матчів</p>
-                    <button id="setupPlayoffsBtn" class="btn btn-secondary" disabled>Налаштувати плей-офф</button>
+                    <p class="info-text">Playoffs will be available after all group matches are completed</p>
+                    <button id="setupPlayoffsBtn" class="btn btn-secondary" disabled>Setup Playoffs</button>
                 </div>
 
                 <div id="playoffs-matches" class="matches-grid">
@@ -113,9 +114,39 @@
             <!-- Results Tab -->
             <div id="results-tab" class="tab-pane">
                 <div class="results-container">
-                    <h2 class="section-title">Підсумки турніру</h2>
+                    <h2 class="section-title">Tournament Results</h2>
                     <div id="final-results" class="podium">
-                        <p class="info-text">Результати з'являться після завершення турніру</p>
+                        <p class="info-text">Results will appear after tournament completion</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rating Tab -->
+            <div id="rating-tab" class="tab-pane">
+                <div class="rating-container">
+                    <div class="rating-header">
+                        <h2 class="section-title">⭐ Player Rating</h2>
+                        <button id="registerPlayerBtn" class="btn btn-primary" style="display:none;">+ Add Player</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="standings-table rating-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Player</th>
+                                    <th>Rating</th>
+                                    <th>Level</th>
+                                    <th>W-L</th>
+                                    <th>Win %</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="rating-body">
+                                <tr>
+                                    <td colspan="7" class="info-text">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -126,12 +157,12 @@
     <div id="adminModal" class="modal">
         <div class="modal-content">
             <span class="close-admin">&times;</span>
-            <h2 class="modal-title">Адмін вхід</h2>
-            <p class="hint-text">Введіть пароль адміністратора</p>
+            <h2 class="modal-title">Admin Login</h2>
+            <p class="hint-text">Enter administrator password</p>
             <div class="admin-input">
-                <input type="password" id="adminPassword" placeholder="Пароль">
+                <input type="password" id="adminPassword" placeholder="Password">
             </div>
-            <button id="submitAdminBtn" class="btn btn-primary">Увійти</button>
+            <button id="submitAdminBtn" class="btn btn-primary">Login</button>
         </div>
     </div>
 
@@ -139,7 +170,7 @@
     <div id="matchModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2 class="modal-title">Введіть результат матчу</h2>
+            <h2 class="modal-title">Enter Match Result</h2>
             <div class="match-info">
                 <p id="matchPlayers"></p>
             </div>
@@ -148,8 +179,48 @@
                 <span class="score-separator">-</span>
                 <input type="number" id="player2Score" min="0" max="7" placeholder="0" inputmode="numeric" pattern="[0-7]">
             </div>
-            <p class="hint-text">Валідні рахунки: 6-0, 6-1, 6-2, 6-3, 6-4, 7-5, 7-6 (і навпаки)</p>
-            <button id="submitScoreBtn" class="btn btn-primary">Зберегти результат</button>
+            <p class="hint-text">Valid scores: 6-0, 6-1, 6-2, 6-3, 6-4, 7-5, 7-6 (and reverse)</p>
+            <button id="submitScoreBtn" class="btn btn-primary">Save Result</button>
+        </div>
+    </div>
+
+    <!-- Register Player Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-register">&times;</span>
+            <h2 class="modal-title">Register New Player</h2>
+            <div class="player-input">
+                <label for="playerName">Player Name:</label>
+                <input type="text" id="playerName" placeholder="Enter name" maxlength="50">
+            </div>
+            <div class="player-input">
+                <label for="playerLevel">Skill Level (1-10):</label>
+                <input type="number" id="playerLevel" min="1" max="10" value="1" inputmode="numeric">
+            </div>
+            <p class="hint-text">Initial rating: 1000 points<br>Win: +100, Loss: -50</p>
+            <button id="submitPlayerBtn" class="btn btn-primary">Register</button>
+        </div>
+    </div>
+
+    <!-- Edit Player Modal -->
+    <div id="editPlayerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-edit-player">&times;</span>
+            <h2 class="modal-title">Edit Player</h2>
+            <div class="player-input">
+                <label for="editPlayerName">Player Name:</label>
+                <input type="text" id="editPlayerName" readonly disabled>
+            </div>
+            <div class="player-input">
+                <label for="editPlayerLevel">Skill Level (1-10 NTRP):</label>
+                <input type="number" id="editPlayerLevel" min="1" max="10" step="0.5" inputmode="decimal">
+            </div>
+            <div class="player-input">
+                <label for="editPlayerRating">Rating:</label>
+                <input type="number" id="editPlayerRating" min="0" inputmode="numeric">
+            </div>
+            <p class="hint-text">NTRP Level: 1.0 - 10.0 (can use 0.5 increments)<br>Rating: Any positive number</p>
+            <button id="submitEditPlayerBtn" class="btn btn-primary">Save Changes</button>
         </div>
     </div>
 

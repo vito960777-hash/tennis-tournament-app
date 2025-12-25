@@ -1,32 +1,77 @@
 """
-Веб-інтерфейс для тенісного турніру ATP Finals
-Flask додаток для управління турніром
+Web interface for ATP Finals tennis tournament
+Flask application for tournament management
 """
 from flask import Flask, render_template, jsonify, request, session
 from tennis_tournament import Player, Group, Tournament, ScheduledMatch
+from players_database import PlayerDatabase
 import os
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
-# Глобальний турнір (один для всіх користувачів)
+# Global tournament (shared by all users)
 global_tournament = None
 
-# Адмін пароль (змініть на свій!)
+# Player database with ratings
+player_db = PlayerDatabase()
+
+# Admin password (change to your own!)
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'tennis2024')
 
 
 def get_tournament():
-    """Отримує глобальний турнір"""
+    """Gets the global tournament"""
     return global_tournament
 
 
 def create_tournament():
-    """Створює новий турнір"""
+    """Creates a new tournament based on player ratings"""
     global global_tournament
 
+    # Check if there are enough players
+    all_players = player_db.get_all_players()
+
+    # If less than 8 players, create defaults
+    if len(all_players) < 8:
+        default_players = [
+            ("Oleksandr", 4),
+            ("Igor", 4),
+            ("Viktor", 4),
+            ("Oleksiy", 4),
+            ("Oleg", 3),
+            ("Vito", 3),
+            ("Yaroslav", 3),
+            ("Prinston", 3),
+        ]
+
+        for name, level in default_players:
+            if not player_db.player_exists(name):
+                player_db.register_player(name, level)
+
+        all_players = player_db.get_all_players()
+
+    # Take top-8 players by rating
+    top_8 = all_players[:8]
+
+    # Create tournament
     tournament = Tournament()
-    tournament.setup_players()
+    tournament.players = []
+
+    # Add players to tournament
+    for i, player_data in enumerate(top_8):
+        player = Player(
+            name=player_data['name'],
+            seed=i+1,
+            level=player_data['level']
+        )
+        tournament.players.append(player)
+
+    # Update tournament participation stats
+    player_names = [p['name'] for p in top_8]
+    player_db.update_tournament_stats(player_names)
+
+    # Draw groups and create schedule
     tournament.draw_groups()
     tournament.create_schedule_for_groups()
 
@@ -35,65 +80,65 @@ def create_tournament():
 
 
 def is_admin():
-    """Перевіряє чи користувач - адмін"""
+    """Checks if the user is an admin"""
     return session.get('is_admin', False)
 
 
 @app.route('/')
 def index():
-    """Головна сторінка"""
+    """Main page"""
     return render_template('index.html')
 
 
 @app.route('/api/auth/login', methods=['POST'])
 def admin_login():
-    """Адмін логін"""
+    """Admin login"""
     data = request.json
     password = data.get('password')
 
     if password == ADMIN_PASSWORD:
         session['is_admin'] = True
-        return jsonify({'success': True, 'message': 'Вхід виконано'})
+        return jsonify({'success': True, 'message': 'Login successful'})
     else:
-        return jsonify({'success': False, 'message': 'Невірний пароль'}), 401
+        return jsonify({'success': False, 'message': 'Invalid password'}), 401
 
 
 @app.route('/api/auth/logout', methods=['POST'])
 def admin_logout():
-    """Адмін вихід"""
+    """Admin logout"""
     session['is_admin'] = False
-    return jsonify({'success': True, 'message': 'Вихід виконано'})
+    return jsonify({'success': True, 'message': 'Logout successful'})
 
 
 @app.route('/api/auth/status')
 def auth_status():
-    """Перевіряє статус авторизації"""
+    """Checks authorization status"""
     return jsonify({'is_admin': is_admin()})
 
 
 @app.route('/api/tournament/new', methods=['POST'])
 def new_tournament():
-    """Створює новий турнір (тільки адмін)"""
+    """Creates a new tournament (admin only)"""
     if not is_admin():
-        return jsonify({'error': 'Тільки адміністратор може створити турнір'}), 403
+        return jsonify({'error': 'Only administrator can create tournament'}), 403
 
     tournament = create_tournament()
 
     return jsonify({
         'success': True,
-        'message': 'Турнір створено успішно'
+        'message': 'Tournament created successfully'
     })
 
 
 @app.route('/api/tournament/info')
 def tournament_info():
-    """Повертає інформацію про турнір"""
+    """Returns tournament information"""
     tournament = get_tournament()
 
     if not tournament:
-        return jsonify({'error': 'Турнір не знайдено'}), 404
+        return jsonify({'error': 'Tournament not found'}), 404
 
-    # Формуємо дані про групи
+    # Format group data
     groups_data = []
     for group in tournament.groups:
         players_data = []
@@ -114,7 +159,7 @@ def tournament_info():
             'players': players_data
         })
 
-    # Формуємо дані про матчі групового етапу
+    # Format group stage match data
     group_matches = []
     for group in tournament.groups:
         for match in group.scheduled_matches:
@@ -137,15 +182,15 @@ def tournament_info():
 
 @app.route('/api/tournament/schedule')
 def tournament_schedule():
-    """Повертає розклад турніру"""
+    """Returns tournament schedule"""
     tournament = get_tournament()
 
     if not tournament:
-        return jsonify({'error': 'Турнір не знайдено'}), 404
+        return jsonify({'error': 'Tournament not found'}), 404
 
     schedule = []
 
-    # Груповий етап
+    # Group stage
     for group in tournament.groups:
         for match in group.scheduled_matches:
             schedule.append({
@@ -159,7 +204,7 @@ def tournament_schedule():
                 'type': 'group'
             })
 
-    # Плей-офф (якщо є)
+    # Playoffs (if exists)
     if tournament.scheduled_semifinals:
         for i, match in enumerate(tournament.scheduled_semifinals, 1):
             schedule.append({
@@ -205,29 +250,29 @@ def tournament_schedule():
 
 @app.route('/api/match/submit', methods=['POST'])
 def submit_match():
-    """Приймає результат матчу (тільки адмін)"""
+    """Submits match result (admin only)"""
     if not is_admin():
-        return jsonify({'error': 'Тільки адміністратор може вносити результати'}), 403
+        return jsonify({'error': 'Only administrator can submit results'}), 403
 
     tournament = get_tournament()
 
     if not tournament:
-        return jsonify({'error': 'Турнір не знайдено'}), 404
+        return jsonify({'error': 'Tournament not found'}), 404
 
     data = request.json
     player1_name = data.get('player1')
     player2_name = data.get('player2')
-    score = data.get('score')  # Формат: "6-4"
+    score = data.get('score')  # Format: "6-4"
     match_type = data.get('type', 'group')
 
     try:
         p1_games, p2_games = map(int, score.split('-'))
 
-        # Валідація рахунку
+        # Validate score
         if not tournament._is_valid_tennis_score(p1_games, p2_games):
-            return jsonify({'error': 'Некоректний теннісний рахунок'}), 400
+            return jsonify({'error': 'Invalid tennis score'}), 400
 
-        # Знаходимо матч
+        # Find match
         match_found = False
 
         if match_type == 'group':
@@ -235,33 +280,53 @@ def submit_match():
                 for match in group.scheduled_matches:
                     if (match.player1.name == player1_name and
                         match.player2.name == player2_name):
+
+                        # If match was already played, revert old rating
+                        if match.score is not None:
+                            old_p1_games, old_p2_games = match.score
+                            old_winner = player1_name if old_p1_games > old_p2_games else player2_name
+                            old_loser = player2_name if old_winner == player1_name else player1_name
+
+                            # Revert old rating
+                            player_db.revert_rating(old_winner, won=True)
+                            player_db.revert_rating(old_loser, won=False)
+
+                        # Save new result
                         match.play(p1_games, p2_games)
                         match_found = True
+
+                        # Add new rating
+                        new_winner = player1_name if p1_games > p2_games else player2_name
+                        new_loser = player2_name if new_winner == player1_name else player1_name
+
+                        player_db.update_rating(new_winner, won=True)
+                        player_db.update_rating(new_loser, won=False)
+
                         break
                 if match_found:
                     break
 
         if not match_found:
-            return jsonify({'error': 'Матч не знайдено'}), 404
+            return jsonify({'error': 'Match not found'}), 404
 
-        return jsonify({'success': True, 'message': 'Результат збережено'})
+        return jsonify({'success': True, 'message': 'Result saved, rating updated'})
 
     except ValueError:
-        return jsonify({'error': 'Неправильний формат рахунку'}), 400
+        return jsonify({'error': 'Invalid score format'}), 400
 
 
 @app.route('/api/playoffs/setup', methods=['POST'])
 def setup_playoffs():
-    """Налаштовує плей-офф (тільки адмін)"""
+    """Sets up playoffs (admin only)"""
     if not is_admin():
-        return jsonify({'error': 'Тільки адміністратор може налаштувати плей-офф'}), 403
+        return jsonify({'error': 'Only administrator can setup playoffs'}), 403
 
     tournament = get_tournament()
 
     if not tournament:
-        return jsonify({'error': 'Турнір не знайдено'}), 404
+        return jsonify({'error': 'Tournament not found'}), 404
 
-    # Перевіряємо, чи всі групові матчі зіграні
+    # Check if all group matches are played
     all_played = True
     for group in tournament.groups:
         for match in group.scheduled_matches:
@@ -270,23 +335,23 @@ def setup_playoffs():
                 break
 
     if not all_played:
-        return jsonify({'error': 'Не всі групові матчі зіграні'}), 400
+        return jsonify({'error': 'Not all group matches are played'}), 400
 
     tournament.setup_playoffs()
 
-    return jsonify({'success': True, 'message': 'Плей-офф налаштовано'})
+    return jsonify({'success': True, 'message': 'Playoffs setup complete'})
 
 
 @app.route('/api/playoffs/match', methods=['POST'])
 def submit_playoff_match():
-    """Приймає результат плей-офф матчу (тільки адмін)"""
+    """Submits playoff match result (admin only)"""
     if not is_admin():
-        return jsonify({'error': 'Тільки адміністратор може вносити результати'}), 403
+        return jsonify({'error': 'Only administrator can submit results'}), 403
 
     tournament = get_tournament()
 
     if not tournament:
-        return jsonify({'error': 'Турнір не знайдено'}), 404
+        return jsonify({'error': 'Tournament not found'}), 404
 
     data = request.json
     player1_name = data.get('player1')
@@ -298,16 +363,31 @@ def submit_playoff_match():
         p1_games, p2_games = map(int, score.split('-'))
 
         if not tournament._is_valid_tennis_score(p1_games, p2_games):
-            return jsonify({'error': 'Некоректний теннісний рахунок'}), 400
+            return jsonify({'error': 'Invalid tennis score'}), 400
 
-        # Знаходимо відповідний матч
+        # Find corresponding match
         if playoff_type == 'semifinal':
             for match in tournament.scheduled_semifinals:
                 if (match.player1.name == player1_name and
                     match.player2.name == player2_name):
+
+                    # If match was already played, revert old rating
+                    if match.score is not None:
+                        old_p1_games, old_p2_games = match.score
+                        old_winner = player1_name if old_p1_games > old_p2_games else player2_name
+                        old_loser = player2_name if old_winner == player1_name else player1_name
+                        player_db.revert_rating(old_winner, won=True)
+                        player_db.revert_rating(old_loser, won=False)
+
                     match.play(p1_games, p2_games)
 
-                    # Якщо обидва півфінали зіграні, створюємо/оновлюємо фінал
+                    # Add new rating
+                    winner = player1_name if p1_games > p2_games else player2_name
+                    loser = player2_name if winner == player1_name else player1_name
+                    player_db.update_rating(winner, won=True)
+                    player_db.update_rating(loser, won=False)
+
+                    # If both semifinals are played, create/update final
                     if all(m.score is not None for m in tournament.scheduled_semifinals):
                         winners = [m.winner for m in tournament.scheduled_semifinals]
                         losers = []
@@ -315,58 +395,89 @@ def submit_playoff_match():
                             loser = m.player2 if m.winner == m.player1 else m.player1
                             losers.append(loser)
 
-                        # Перевіряємо чи фінал вже існує
+                        # Check if final already exists
                         if tournament.scheduled_final:
-                            # Скидаємо статистику старого фіналу якщо він був зіграний
+                            # Reset old final stats if it was played
                             if tournament.scheduled_final.score is not None:
                                 tournament.scheduled_final.score = None
                                 tournament.scheduled_final.winner = None
 
                         if tournament.scheduled_third_place:
-                            # Скидаємо статистику матчу за 3 місце якщо він був зіграний
+                            # Reset 3rd place match stats if it was played
                             if tournament.scheduled_third_place.score is not None:
                                 tournament.scheduled_third_place.score = None
                                 tournament.scheduled_third_place.winner = None
 
                         tournament.scheduled_final = ScheduledMatch(
-                            winners[0], winners[1], "15:00-16:00", 1, 0, "Фінал"
+                            winners[0], winners[1], "15:00-16:00", 1, 0, "Final"
                         )
                         tournament.scheduled_third_place = ScheduledMatch(
-                            losers[0], losers[1], "15:00-16:00", 2, 0, "Матч за 3 місце"
+                            losers[0], losers[1], "15:00-16:00", 2, 0, "3rd Place Match"
                         )
                         tournament.final = tournament.scheduled_final
                         tournament.third_place_match = tournament.scheduled_third_place
 
-                    return jsonify({'success': True, 'message': 'Результат збережено'})
+                    return jsonify({'success': True, 'message': 'Result saved'})
 
         elif playoff_type == 'final' and tournament.scheduled_final:
             if (tournament.scheduled_final.player1.name == player1_name and
                 tournament.scheduled_final.player2.name == player2_name):
+
+                # If match was already played, revert old rating
+                if tournament.scheduled_final.score is not None:
+                    old_p1_games, old_p2_games = tournament.scheduled_final.score
+                    old_winner = player1_name if old_p1_games > old_p2_games else player2_name
+                    old_loser = player2_name if old_winner == player1_name else player1_name
+                    player_db.revert_rating(old_winner, won=True)
+                    player_db.revert_rating(old_loser, won=False)
+
                 tournament.scheduled_final.play(p1_games, p2_games)
-                return jsonify({'success': True, 'message': 'Фінал завершено!'})
+
+                # Add new rating
+                winner = player1_name if p1_games > p2_games else player2_name
+                loser = player2_name if winner == player1_name else player1_name
+                player_db.update_rating(winner, won=True)
+                player_db.update_rating(loser, won=False)
+
+                return jsonify({'success': True, 'message': 'Final completed, rating updated!'})
 
         elif playoff_type == 'third_place' and tournament.scheduled_third_place:
             if (tournament.scheduled_third_place.player1.name == player1_name and
                 tournament.scheduled_third_place.player2.name == player2_name):
-                tournament.scheduled_third_place.play(p1_games, p2_games)
-                return jsonify({'success': True, 'message': 'Матч за 3 місце завершено!'})
 
-        return jsonify({'error': 'Матч не знайдено'}), 404
+                # If match was already played, revert old rating
+                if tournament.scheduled_third_place.score is not None:
+                    old_p1_games, old_p2_games = tournament.scheduled_third_place.score
+                    old_winner = player1_name if old_p1_games > old_p2_games else player2_name
+                    old_loser = player2_name if old_winner == player1_name else player1_name
+                    player_db.revert_rating(old_winner, won=True)
+                    player_db.revert_rating(old_loser, won=False)
+
+                tournament.scheduled_third_place.play(p1_games, p2_games)
+
+                # Add new rating
+                winner = player1_name if p1_games > p2_games else player2_name
+                loser = player2_name if winner == player1_name else player1_name
+                player_db.update_rating(winner, won=True)
+                player_db.update_rating(loser, won=False)
+                return jsonify({'success': True, 'message': 'Third place match completed, rating updated!'})
+
+        return jsonify({'error': 'Match not found'}), 404
 
     except ValueError:
-        return jsonify({'error': 'Неправильний формат рахунку'}), 400
+        return jsonify({'error': 'Invalid score format'}), 400
 
 
 @app.route('/api/results')
 def final_results():
-    """Повертає фінальні результати турніру"""
+    """Returns final tournament results"""
     tournament = get_tournament()
 
     if not tournament:
-        return jsonify({'error': 'Турнір не знайдено'}), 404
+        return jsonify({'error': 'Tournament not found'}), 404
 
     if not tournament.final or not tournament.final.winner:
-        return jsonify({'error': 'Турнір ще не завершений'}), 400
+        return jsonify({'error': 'Tournament not yet completed'}), 400
 
     runner_up = (tournament.final.player2 if tournament.final.winner == tournament.final.player1
                  else tournament.final.player1)
@@ -385,8 +496,95 @@ def final_results():
     })
 
 
+# ===== API for player management =====
+
+@app.route('/api/players')
+def get_players():
+    """Returns list of all players with ratings"""
+    players = player_db.get_all_players()
+    return jsonify({'players': players})
+
+
+@app.route('/api/players/<name>')
+def get_player_stats(name):
+    """Returns detailed player statistics"""
+    stats = player_db.get_player_stats(name)
+
+    if not stats:
+        return jsonify({'error': 'Player not found'}), 404
+
+    return jsonify(stats)
+
+
+@app.route('/api/players', methods=['POST'])
+def register_player():
+    """Registers a new player (admin only)"""
+    if not is_admin():
+        return jsonify({'error': 'Only administrator can register players'}), 403
+
+    data = request.json
+    name = data.get('name')
+    level = data.get('level', 1)
+
+    if not name:
+        return jsonify({'error': 'Player name is required'}), 400
+
+    if not (1 <= level <= 10):
+        return jsonify({'error': 'Level must be between 1 and 10'}), 400
+
+    try:
+        player = player_db.register_player(name, level)
+        return jsonify({
+            'success': True,
+            'message': f'Player {name} successfully registered',
+            'player': player
+        })
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+
+
+@app.route('/api/players/<name>', methods=['PUT'])
+def update_player(name):
+    """Updates player data (admin only)"""
+    if not is_admin():
+        return jsonify({'error': 'Only administrator can update players'}), 403
+
+    if not player_db.player_exists(name):
+        return jsonify({'error': 'Player not found'}), 404
+
+    data = request.json
+    level = data.get('level')
+    rating = data.get('rating')
+
+    try:
+        player_db.update_player(name, level=level, rating=rating)
+        return jsonify({
+            'success': True,
+            'message': f'Player {name} updated',
+            'player': player_db.get_player(name)
+        })
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+
+
+@app.route('/api/players/<name>', methods=['DELETE'])
+def delete_player(name):
+    """Deletes a player (admin only)"""
+    if not is_admin():
+        return jsonify({'error': 'Only administrator can delete players'}), 403
+
+    if not player_db.player_exists(name):
+        return jsonify({'error': 'Player not found'}), 404
+
+    player_db.delete_player(name)
+    return jsonify({
+        'success': True,
+        'message': f'Player {name} deleted'
+    })
+
+
 if __name__ == '__main__':
-    # Debug режим тільки для локальної розробки
+    # Debug mode for local development only
     import os
     port = int(os.environ.get('PORT', 5001))
     app.run(debug=True, port=port, host='0.0.0.0')

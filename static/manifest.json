@@ -1,7 +1,7 @@
 {
-  "name": "Новорічний Турнір Дананг 2025",
-  "short_name": "Дананг 2025",
-  "description": "Святковий тенісний турнір у В'єтнамі",
+  "name": "New Year Tournament Danang 2025",
+  "short_name": "Danang 2025",
+  "description": "Festive Tennis Tournament in Vietnam",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#c41e3a",

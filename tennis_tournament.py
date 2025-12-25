@@ -89,7 +89,7 @@ class Match:
 class ScheduledMatch(Match):
     """Клас для матчу з розкладом"""
 
-    def __init__(self, player1: Player, player2: Player, time: str, court: int, round_num: int = 0, stage: str = "Груповий етап"):
+    def __init__(self, player1: Player, player2: Player, time: str, court: int, round_num: int = 0, stage: str = "Group Stage"):
         super().__init__(player1, player2)
         self.time = time
         self.court = court
@@ -124,15 +124,32 @@ class Group:
 
         if len(self.players) == 4:
             p0, p1, p2, p3 = self.players
-            # Раунд 1
-            self.matches.append(Match(p0, p2))
-            self.matches.append(Match(p1, p3))
-            # Раунд 2
-            self.matches.append(Match(p0, p3))
-            self.matches.append(Match(p1, p2))
-            # Раунд 3
-            self.matches.append(Match(p0, p1))
-            self.matches.append(Match(p2, p3))
+
+            # Спеціальний порядок для групи з Vito
+            player_names = [p.name for p in self.players]
+            if "Vito" in player_names:
+                # Порядок: ["Oleksandr", "Viktor", "Vito", "Yaroslav"]
+                # p0 = Oleksandr, p1 = Viktor, p2 = Vito, p3 = Yaroslav
+                # Раунд 1: Viktor vs Vito, Oleksandr vs Yaroslav
+                self.matches.append(Match(p1, p2))
+                self.matches.append(Match(p0, p3))
+                # Раунд 2: Vito vs Yaroslav, Oleksandr vs Viktor
+                self.matches.append(Match(p2, p3))
+                self.matches.append(Match(p0, p1))
+                # Раунд 3: Vito vs Oleksandr, Viktor vs Yaroslav
+                self.matches.append(Match(p2, p0))
+                self.matches.append(Match(p1, p3))
+            else:
+                # Стандартний порядок для групи B
+                # Раунд 1
+                self.matches.append(Match(p0, p2))
+                self.matches.append(Match(p1, p3))
+                # Раунд 2
+                self.matches.append(Match(p0, p3))
+                self.matches.append(Match(p1, p2))
+                # Раунд 3
+                self.matches.append(Match(p0, p1))
+                self.matches.append(Match(p2, p3))
         else:
             # Якщо кількість гравців не 4, використовуємо стандартний метод
             for i in range(len(self.players)):
@@ -229,7 +246,7 @@ class Tournament:
                         time_slot,
                         court,
                         round_idx,
-                        f"Група {group_a.name}"
+                        f"Group {group_a.name}"
                     )
                     group_a.scheduled_matches.append(scheduled_match)
 
@@ -245,7 +262,7 @@ class Tournament:
                         time_slot,
                         court,
                         round_idx,
-                        f"Група {group_b.name}"
+                        f"Group {group_b.name}"
                     )
                     group_b.scheduled_matches.append(scheduled_match)
 
@@ -298,18 +315,26 @@ class Tournament:
         print("\nФіксований розподіл гравців по групах\n")
 
         # Фіксовані групи
-        group_a_names = ["Олександр", "Марія", "Віто", "Ярослав"]
-        group_b_names = ["Ігорь", "Олексій", "Олег", "Віктор"]
+        group_a_names = ["Oleksandr", "Viktor", "Vito", "Yaroslav"]
+        group_b_names = ["Igor", "Oleksiy", "Oleg", "Prinston"]
 
-        # Розподіляємо гравців по групах
+        # Розподіляємо гравців по групах у заданому порядку
         group_a_players = []
         group_b_players = []
 
-        for player in self.players:
-            if player.name in group_a_names:
-                group_a_players.append(player)
-            elif player.name in group_b_names:
-                group_b_players.append(player)
+        # Додаємо гравців групи A в порядку group_a_names
+        for name in group_a_names:
+            for player in self.players:
+                if player.name == name:
+                    group_a_players.append(player)
+                    break
+
+        # Додаємо гравців групи B в порядку group_b_names
+        for name in group_b_names:
+            for player in self.players:
+                if player.name == name:
+                    group_b_players.append(player)
+                    break
 
         self.groups = [
             Group("A", group_a_players),
