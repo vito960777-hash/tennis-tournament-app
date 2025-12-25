@@ -429,7 +429,7 @@ function renderSchedule(schedule) {
     if (groupMatches.length > 0) {
         const groupStageHeader = document.createElement('div');
         groupStageHeader.className = 'stage-header';
-        groupStageHeader.innerHTML = '<h2>🎾 ГРУПОВИЙ ЕТАП</h2>';
+        groupStageHeader.innerHTML = '<h2>🎄 ГРУПОВИЙ ЕТАП</h2>';
         container.appendChild(groupStageHeader);
 
         // Define rounds
@@ -504,7 +504,7 @@ function renderSchedule(schedule) {
     if (playoffMatches.length > 0) {
         const playoffHeader = document.createElement('div');
         playoffHeader.className = 'stage-header';
-        playoffHeader.innerHTML = '<h2>🏆 ПЛЕЙ-ОФФ</h2>';
+        playoffHeader.innerHTML = '<h2>⭐ ПЛЕЙ-ОФФ</h2>';
         container.appendChild(playoffHeader);
 
         // Group playoff matches by time

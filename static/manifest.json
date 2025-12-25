@@ -1,11 +1,11 @@
 {
-  "name": "ATP Finals Tournament",
-  "short_name": "Tennis",
-  "description": "Тенісний турнір в стилі ATP Finals",
+  "name": "Новорічний Турнір Дананг 2025",
+  "short_name": "Дананг 2025",
+  "description": "Святковий тенісний турнір у В'єтнамі",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#667eea",
-  "theme_color": "#667eea",
+  "background_color": "#c41e3a",
+  "theme_color": "#c41e3a",
   "orientation": "portrait-primary",
   "icons": [
     {

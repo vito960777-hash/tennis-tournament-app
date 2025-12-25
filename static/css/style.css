@@ -6,23 +6,24 @@
 }
 
 :root {
-    --primary-color: #2563eb;
-    --primary-dark: #1e40af;
-    --secondary-color: #10b981;
-    --background: #f8fafc;
+    --primary-color: #c41e3a;
+    --primary-dark: #8b1a2e;
+    --secondary-color: #0f7d40;
+    --gold-color: #d4af37;
+    --background: #fffef7;
     --surface: #ffffff;
     --text-primary: #1e293b;
     --text-secondary: #64748b;
-    --border: #e2e8f0;
-    --shadow: rgba(0, 0, 0, 0.1);
-    --success: #10b981;
-    --error: #ef4444;
-    --warning: #f59e0b;
+    --border: #e8dcc4;
+    --shadow: rgba(196, 30, 58, 0.15);
+    --success: #0f7d40;
+    --error: #c41e3a;
+    --warning: #d4af37;
 }
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #c41e3a 0%, #0f7d40 50%, #d4af37 100%);
     color: var(--text-primary);
     line-height: 1.6;
     min-height: 100vh;
@@ -48,12 +49,13 @@ body {
 
 /* Header */
 .header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #c41e3a 0%, #0f7d40 100%);
     padding: 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: white;
+    position: relative;
 }
 
 .header-content h1 {
@@ -250,7 +252,7 @@ body {
 
 /* Round headers */
 .round-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #c41e3a 0%, #0f7d40 100%);
     color: white;
     padding: 1rem 1.5rem;
     border-radius: 10px;
@@ -258,6 +260,7 @@ body {
     display: block;
     width: 100%;
     clear: both;
+    box-shadow: 0 4px 10px rgba(196, 30, 58, 0.3);
 }
 
 .round-header h3 {
@@ -271,18 +274,20 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 1rem;
-    background: var(--background);
-    border-left: 4px solid var(--primary-color);
+    background: linear-gradient(to right, #fffef7, #ffffff);
+    border-left: 4px solid var(--gold-color);
     margin: 1rem 0 0.75rem 0;
     border-radius: 5px;
     width: 100%;
     clear: both;
+    box-shadow: 0 2px 5px rgba(212, 175, 55, 0.2);
 }
 
 .group-label {
     font-weight: 600;
     font-size: 1.1rem;
     color: var(--primary-color);
+    text-shadow: 0 1px 2px rgba(196, 30, 58, 0.2);
 }
 
 .time-label {
@@ -293,12 +298,13 @@ body {
 
 /* Stage headers */
 .stage-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #c41e3a 0%, #d4af37 100%);
     color: white;
     padding: 1.5rem;
     border-radius: 12px;
     margin: 2rem 0 1.5rem 0;
     text-align: center;
+    box-shadow: 0 6px 15px rgba(196, 30, 58, 0.4);
 }
 
 .stage-header h2 {
@@ -1029,5 +1035,48 @@ body {
         width: 60px;
         height: 60px;
         font-size: 1.5rem;
+    }
+}
+
+/* Christmas Decorations */
+.header::before {
+    content: '❄️';
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    font-size: 1.5rem;
+    opacity: 0.7;
+    animation: snowfall 3s ease-in-out infinite;
+}
+
+.header::after {
+    content: '✨';
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 1.5rem;
+    opacity: 0.7;
+    animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes snowfall {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.7;
+    }
+    50% {
+        transform: translateY(10px) rotate(180deg);
+        opacity: 1;
+    }
+}
+
+@keyframes sparkle {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 0.7;
+    }
+    50% {
+        transform: scale(1.2) rotate(180deg);
+        opacity: 1;
     }
 }
