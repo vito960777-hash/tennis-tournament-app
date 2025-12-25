@@ -13,7 +13,7 @@ app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-producti
 # Global tournament (shared by all users)
 global_tournament = None
 
-# Player database with ratings
+# Player database
 player_db = PlayerDatabase()
 
 # Admin password (change to your own!)
@@ -26,7 +26,7 @@ def get_tournament():
 
 
 def create_tournament():
-    """Creates a new tournament based on player ratings"""
+    """Creates a new tournament"""
     global global_tournament
 
     # Check if there are enough players
@@ -51,7 +51,7 @@ def create_tournament():
 
         all_players = player_db.get_all_players()
 
-    # Take top-8 players by rating
+    # Take top-8 players
     top_8 = all_players[:8]
 
     # Create tournament
@@ -281,27 +281,9 @@ def submit_match():
                     if (match.player1.name == player1_name and
                         match.player2.name == player2_name):
 
-                        # If match was already played, revert old rating
-                        if match.score is not None:
-                            old_p1_games, old_p2_games = match.score
-                            old_winner = player1_name if old_p1_games > old_p2_games else player2_name
-                            old_loser = player2_name if old_winner == player1_name else player1_name
-
-                            # Revert old rating
-                            player_db.revert_rating(old_winner, won=True)
-                            player_db.revert_rating(old_loser, won=False)
-
                         # Save new result
                         match.play(p1_games, p2_games)
                         match_found = True
-
-                        # Add new rating
-                        new_winner = player1_name if p1_games > p2_games else player2_name
-                        new_loser = player2_name if new_winner == player1_name else player1_name
-
-                        player_db.update_rating(new_winner, won=True)
-                        player_db.update_rating(new_loser, won=False)
-
                         break
                 if match_found:
                     break
@@ -309,7 +291,7 @@ def submit_match():
         if not match_found:
             return jsonify({'error': 'Match not found'}), 404
 
-        return jsonify({'success': True, 'message': 'Result saved, rating updated'})
+        return jsonify({'success': True, 'message': 'Result saved'})
 
     except ValueError:
         return jsonify({'error': 'Invalid score format'}), 400
@@ -371,21 +353,7 @@ def submit_playoff_match():
                 if (match.player1.name == player1_name and
                     match.player2.name == player2_name):
 
-                    # If match was already played, revert old rating
-                    if match.score is not None:
-                        old_p1_games, old_p2_games = match.score
-                        old_winner = player1_name if old_p1_games > old_p2_games else player2_name
-                        old_loser = player2_name if old_winner == player1_name else player1_name
-                        player_db.revert_rating(old_winner, won=True)
-                        player_db.revert_rating(old_loser, won=False)
-
                     match.play(p1_games, p2_games)
-
-                    # Add new rating
-                    winner = player1_name if p1_games > p2_games else player2_name
-                    loser = player2_name if winner == player1_name else player1_name
-                    player_db.update_rating(winner, won=True)
-                    player_db.update_rating(loser, won=False)
 
                     # If both semifinals are played, create/update final
                     if all(m.score is not None for m in tournament.scheduled_semifinals):
@@ -423,44 +391,16 @@ def submit_playoff_match():
             if (tournament.scheduled_final.player1.name == player1_name and
                 tournament.scheduled_final.player2.name == player2_name):
 
-                # If match was already played, revert old rating
-                if tournament.scheduled_final.score is not None:
-                    old_p1_games, old_p2_games = tournament.scheduled_final.score
-                    old_winner = player1_name if old_p1_games > old_p2_games else player2_name
-                    old_loser = player2_name if old_winner == player1_name else player1_name
-                    player_db.revert_rating(old_winner, won=True)
-                    player_db.revert_rating(old_loser, won=False)
-
                 tournament.scheduled_final.play(p1_games, p2_games)
 
-                # Add new rating
-                winner = player1_name if p1_games > p2_games else player2_name
-                loser = player2_name if winner == player1_name else player1_name
-                player_db.update_rating(winner, won=True)
-                player_db.update_rating(loser, won=False)
-
-                return jsonify({'success': True, 'message': 'Final completed, rating updated!'})
+                return jsonify({'success': True, 'message': 'Final completed!'})
 
         elif playoff_type == 'third_place' and tournament.scheduled_third_place:
             if (tournament.scheduled_third_place.player1.name == player1_name and
                 tournament.scheduled_third_place.player2.name == player2_name):
 
-                # If match was already played, revert old rating
-                if tournament.scheduled_third_place.score is not None:
-                    old_p1_games, old_p2_games = tournament.scheduled_third_place.score
-                    old_winner = player1_name if old_p1_games > old_p2_games else player2_name
-                    old_loser = player2_name if old_winner == player1_name else player1_name
-                    player_db.revert_rating(old_winner, won=True)
-                    player_db.revert_rating(old_loser, won=False)
-
                 tournament.scheduled_third_place.play(p1_games, p2_games)
-
-                # Add new rating
-                winner = player1_name if p1_games > p2_games else player2_name
-                loser = player2_name if winner == player1_name else player1_name
-                player_db.update_rating(winner, won=True)
-                player_db.update_rating(loser, won=False)
-                return jsonify({'success': True, 'message': 'Third place match completed, rating updated!'})
+                return jsonify({'success': True, 'message': 'Third place match completed!'})
 
         return jsonify({'error': 'Match not found'}), 404
 
@@ -500,7 +440,7 @@ def final_results():
 
 @app.route('/api/players')
 def get_players():
-    """Returns list of all players with ratings"""
+    """Returns list of all players"""
     players = player_db.get_all_players()
     return jsonify({'players': players})
 
@@ -554,10 +494,9 @@ def update_player(name):
 
     data = request.json
     level = data.get('level')
-    rating = data.get('rating')
 
     try:
-        player_db.update_player(name, level=level, rating=rating)
+        player_db.update_player(name, level=level)
         return jsonify({
             'success': True,
             'message': f'Player {name} updated',

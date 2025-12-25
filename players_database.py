@@ -45,7 +45,6 @@ class PlayerDatabase:
         player_data = {
             'name': name,
             'level': level,
-            'rating': 1000,  # Початковий рейтинг
             'tournaments_played': 0,
             'total_wins': 0,
             'total_losses': 0,
@@ -61,54 +60,10 @@ class PlayerDatabase:
         return self.players.get(name)
 
     def get_all_players(self) -> List[Dict]:
-        """Отримує всіх гравців, відсортованих за рейтингом"""
+        """Отримує всіх гравців"""
         players_list = list(self.players.values())
-        players_list.sort(key=lambda x: x['rating'], reverse=True)
         return players_list
 
-    def update_rating(self, name: str, won: bool):
-        """
-        Оновлює рейтинг гравця після матчу
-
-        Args:
-            name: Ім'я гравця
-            won: True якщо переміг, False якщо програв
-        """
-        if name not in self.players:
-            return
-
-        player = self.players[name]
-
-        if won:
-            player['rating'] += 100
-            player['total_wins'] += 1
-        else:
-            player['rating'] -= 50
-            player['total_losses'] += 1
-
-        self._save_players()
-
-    def revert_rating(self, name: str, won: bool):
-        """
-        Скасовує рейтинг гравця (для редагування результатів)
-
-        Args:
-            name: Ім'я гравця
-            won: True якщо він виграв у попередньому результаті
-        """
-        if name not in self.players:
-            return
-
-        player = self.players[name]
-
-        if won:
-            player['rating'] -= 100
-            player['total_wins'] -= 1
-        else:
-            player['rating'] += 50
-            player['total_losses'] -= 1
-
-        self._save_players()
 
     def update_tournament_stats(self, player_names: List[str]):
         """Оновлює статистику участі в турнірах"""
@@ -140,14 +95,13 @@ class PlayerDatabase:
             del self.players[name]
             self._save_players()
 
-    def update_player(self, name: str, level: Optional[float] = None, rating: Optional[int] = None):
+    def update_player(self, name: str, level: Optional[float] = None):
         """
         Оновлює характеристики гравця
 
         Args:
             name: Ім'я гравця
             level: Новий рівень (1.0-10.0, NTRP система, підтримує 0.5 кроки)
-            rating: Новий рейтинг
         """
         if name not in self.players:
             raise ValueError(f"Player {name} not found")
@@ -158,11 +112,6 @@ class PlayerDatabase:
             if level < 1.0 or level > 10.0:
                 raise ValueError("Level must be between 1.0 and 10.0")
             player['level'] = level
-
-        if rating is not None:
-            if rating < 0:
-                raise ValueError("Rating cannot be negative")
-            player['rating'] = rating
 
         self._save_players()
 
@@ -178,7 +127,6 @@ class PlayerDatabase:
         return {
             'name': player['name'],
             'level': player['level'],
-            'rating': player['rating'],
             'tournaments_played': player['tournaments_played'],
             'total_wins': player['total_wins'],
             'total_losses': player['total_losses'],
