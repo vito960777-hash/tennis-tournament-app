@@ -3,7 +3,7 @@
     "name": "Oleksandr",
     "level": 4,
     "rating": 1000,
-    "tournaments_played": 19,
+    "tournaments_played": 21,
     "total_wins": 0,
     "total_losses": 0,
     "registered_date": "2025-12-25T20:03:30.322185"
@@ -12,7 +12,7 @@
     "name": "Igor",
     "level": 4,
     "rating": 1000,
-    "tournaments_played": 19,
+    "tournaments_played": 21,
     "total_wins": 0,
     "total_losses": 0,
     "registered_date": "2025-12-25T20:03:30.322878"
@@ -20,17 +20,17 @@
   "Viktor": {
     "name": "Viktor",
     "level": 3,
-    "rating": 1000,
-    "tournaments_played": 19,
+    "rating": 950,
+    "tournaments_played": 21,
     "total_wins": 0,
-    "total_losses": 0,
+    "total_losses": 1,
     "registered_date": "2025-12-25T20:03:30.323979"
   },
   "Oleksiy": {
     "name": "Oleksiy",
     "level": 4,
     "rating": 1000,
-    "tournaments_played": 19,
+    "tournaments_played": 21,
     "total_wins": 0,
     "total_losses": 0,
     "registered_date": "2025-12-25T20:03:30.324207"
@@ -39,7 +39,7 @@
     "name": "Oleg",
     "level": 3.5,
     "rating": 1000,
-    "tournaments_played": 19,
+    "tournaments_played": 21,
     "total_wins": 0,
     "total_losses": 0,
     "registered_date": "2025-12-25T20:03:30.324390"
@@ -47,9 +47,9 @@
   "Vito": {
     "name": "Vito",
     "level": 3.5,
-    "rating": 1000,
-    "tournaments_played": 19,
-    "total_wins": 0,
+    "rating": 1100,
+    "tournaments_played": 21,
+    "total_wins": 1,
     "total_losses": 0,
     "registered_date": "2025-12-25T20:03:30.324561"
   },
@@ -57,7 +57,7 @@
     "name": "Yaroslav",
     "level": 3.5,
     "rating": 1000,
-    "tournaments_played": 19,
+    "tournaments_played": 21,
     "total_wins": 0,
     "total_losses": 0,
     "registered_date": "2025-12-25T20:03:30.324757"
@@ -66,7 +66,7 @@
     "name": "Prinston",
     "level": 3,
     "rating": 1000,
-    "tournaments_played": 13,
+    "tournaments_played": 15,
     "total_wins": 0,
     "total_losses": 0,
     "registered_date": "2025-12-25T21:08:19.055425"
