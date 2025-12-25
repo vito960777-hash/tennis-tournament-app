@@ -57,10 +57,16 @@ class Match:
         self.winner: Optional[Player] = None
         self.score: Optional[tuple[int, int]] = None
 
-    def play(self, p1_games: int, p2_games: int):
-        """Записує результат матчу"""
+    def play(self, p1_games: int, p2_games: int, update_stats: bool = True):
+        """Записує результат матчу
+
+        Args:
+            p1_games: Кількість геймів першого гравця
+            p2_games: Кількість геймів другого гравця
+            update_stats: Чи оновлювати статистику гравців (False для плейофф матчів)
+        """
         # Якщо матч вже був зіграний, видаляємо стару статистику
-        if self.score is not None and self.winner is not None:
+        if self.score is not None and self.winner is not None and update_stats:
             old_p1_games, old_p2_games = self.score
             if self.winner == self.player1:
                 self.player1.remove_match_result(True, old_p1_games, old_p2_games)
@@ -73,12 +79,14 @@ class Match:
         self.score = (p1_games, p2_games)
         if p1_games > p2_games:
             self.winner = self.player1
-            self.player1.add_match_result(True, p1_games, p2_games)
-            self.player2.add_match_result(False, p2_games, p1_games)
+            if update_stats:
+                self.player1.add_match_result(True, p1_games, p2_games)
+                self.player2.add_match_result(False, p2_games, p1_games)
         else:
             self.winner = self.player2
-            self.player2.add_match_result(True, p2_games, p1_games)
-            self.player1.add_match_result(False, p1_games, p2_games)
+            if update_stats:
+                self.player2.add_match_result(True, p2_games, p1_games)
+                self.player1.add_match_result(False, p1_games, p2_games)
 
     def __str__(self):
         if self.score:
@@ -95,6 +103,23 @@ class ScheduledMatch(Match):
         self.court = court
         self.round_num = round_num
         self.stage = stage
+
+    def play(self, p1_games: int, p2_games: int, update_stats: bool = None):
+        """Записує результат матчу з автоматичним визначенням чи оновлювати статистику
+
+        Args:
+            p1_games: Кількість геймів першого гравця
+            p2_games: Кількість геймів другого гравця
+            update_stats: Чи оновлювати статистику гравців. Якщо None, визначається автоматично
+        """
+        # Автоматично визначаємо чи це груповий матч
+        if update_stats is None:
+            # Плейофф матчі не оновлюють групову статистику
+            is_playoff = any(keyword in self.stage for keyword in ["Півфінал", "Фінал", "3 місце", "Semifinal", "Final", "3rd Place"])
+            update_stats = not is_playoff
+
+        # Викликаємо батьківський метод
+        super().play(p1_games, p2_games, update_stats)
 
     def get_schedule_string(self) -> str:
         """Повертає рядок з інформацією про розклад"""
