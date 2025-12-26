@@ -341,7 +341,7 @@ class Tournament:
 
         # Фіксовані групи
         group_a_names = ["Oleksandr", "Viktor", "Vito", "Yaroslav"]
-        group_b_names = ["Igor", "Oleksiy", "Oleg", "Prinston"]
+        group_b_names = ["Igor", "Oleksiy", "Oleg", "Princeton"]
 
         # Розподіляємо гравців по групах у заданому порядку
         group_a_players = []

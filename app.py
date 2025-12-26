@@ -42,7 +42,7 @@ def create_tournament():
             ("Oleg", 3),
             ("Vito", 3),
             ("Yaroslav", 3),
-            ("Prinston", 3),
+            ("Princeton", 3),
         ]
 
         for name, level in default_players:
