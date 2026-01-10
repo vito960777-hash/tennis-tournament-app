@@ -1189,3 +1189,127 @@ body {
     opacity: 0.5;
     z-index: -1;
 }
+
+/* ========== MOBILE TOUCH IMPROVEMENTS ========== */
+
+/* Touch feedback for buttons */
+.btn.touch-active,
+.tab-btn.touch-active {
+    transform: scale(0.95);
+    opacity: 0.8;
+}
+
+/* Ensure buttons are easily tappable on mobile */
+@media (max-width: 768px) {
+    .btn {
+        min-height: 48px;
+        min-width: 48px;
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    /* Fix header layout on mobile */
+    .header {
+        padding: 1.5rem 1rem;
+        padding-top: max(1.5rem, env(safe-area-inset-top));
+    }
+
+    .header-content h1 {
+        font-size: 1.4rem;
+        line-height: 1.3;
+    }
+
+    /* Improve tab buttons on mobile */
+    .tab-btn {
+        min-height: 48px;
+        padding: 0.875rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    /* Better modal positioning */
+    .modal {
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        margin: auto;
+        max-height: 90vh;
+        max-height: calc(var(--vh, 1vh) * 90);
+        overflow-y: auto;
+        border-radius: 16px;
+    }
+
+    /* Close button improvements */
+    .close,
+    .close-admin {
+        font-size: 2rem;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+    }
+
+    /* Input improvements for mobile */
+    .admin-input input,
+    .score-input input {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+}
+
+/* Extra improvements for very small screens */
+@media (max-width: 380px) {
+    .header-content h1 {
+        font-size: 1.2rem;
+    }
+
+    .subtitle {
+        font-size: 0.65rem;
+    }
+
+    .tab-btn {
+        font-size: 0.65rem;
+        padding: 0.75rem 0.4rem;
+        letter-spacing: 0;
+    }
+
+    .btn {
+        font-size: 0.85rem;
+        padding: 0.875rem 1rem;
+    }
+}
+
+/* Improve touch targets for match cards */
+.match-card {
+    min-height: 100px;
+}
+
+.match-card.admin-mode {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Active state for match cards on touch */
+.match-card.touch-active {
+    transform: scale(0.98);
+    border-color: var(--primary-color);
+}
+
+/* Ensure modals work properly on mobile Safari */
+@supports (-webkit-touch-callout: none) {
+    .modal-content {
+        max-height: -webkit-fill-available;
+    }
+
+    body.modal-open {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+}

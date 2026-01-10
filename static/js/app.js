@@ -35,54 +35,111 @@ function initMobileFixes() {
     window.addEventListener('resize', setVH);
     window.addEventListener('orientationchange', setVH);
 
-    // Prevent double-tap zoom on buttons
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', (e) => {
-        const now = Date.now();
-        if (now - lastTouchEnd <= 300) {
-            e.preventDefault();
-        }
-        lastTouchEnd = now;
-    }, false);
+    // Add touch support for all interactive elements
+    const addTouchSupport = (element, callback) => {
+        if (!element) return;
 
-    // Smooth scroll for tabs
-    const tabs = document.querySelector('.tabs');
-    if (tabs) {
-        tabs.addEventListener('touchstart', (e) => {
-            e.stopPropagation();
+        let touchStartY = 0;
+        let touchStartX = 0;
+
+        element.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+            touchStartX = e.touches[0].clientX;
+            element.classList.add('touch-active');
         }, { passive: true });
-    }
 
-    // Prevent body scroll when modal is open
-    const observeModal = (modal) => {
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.attributeName === 'style') {
-                    if (modal.style.display === 'block') {
-                        document.body.style.overflow = 'hidden';
-                        document.body.style.position = 'fixed';
-                        document.body.style.width = '100%';
-                    } else {
-                        document.body.style.overflow = '';
-                        document.body.style.position = '';
-                        document.body.style.width = '';
-                    }
-                }
-            });
-        });
+        element.addEventListener('touchend', (e) => {
+            element.classList.remove('touch-active');
 
-        observer.observe(modal, { attributes: true });
+            // Check if it was a tap (not a scroll)
+            const touchEndY = e.changedTouches[0].clientY;
+            const touchEndX = e.changedTouches[0].clientX;
+            const deltaY = Math.abs(touchEndY - touchStartY);
+            const deltaX = Math.abs(touchEndX - touchStartX);
+
+            // If movement is less than 10px, consider it a tap
+            if (deltaY < 10 && deltaX < 10) {
+                e.preventDefault();
+                callback(e);
+            }
+        }, { passive: false });
     };
 
-    observeModal(matchModal);
-    observeModal(adminModal);
+    // Add touch support for admin buttons
+    addTouchSupport(adminLoginBtn, () => {
+        adminModal.style.display = 'block';
+    });
+
+    addTouchSupport(adminLogoutBtn, () => {
+        adminLogout();
+    });
+
+    addTouchSupport(submitAdminBtn, () => {
+        adminLogin();
+    });
+
+    addTouchSupport(closeAdminModal, () => {
+        adminModal.style.display = 'none';
+    });
+
+    addTouchSupport(closeModal, () => {
+        matchModal.style.display = 'none';
+    });
+
+    addTouchSupport(newTournamentBtn, () => {
+        createNewTournament();
+    });
+
+    addTouchSupport(setupPlayoffsBtn, () => {
+        setupPlayoffs();
+    });
+
+    addTouchSupport(submitScoreBtn, () => {
+        submitScore();
+    });
+
+    // Handle modal background tap to close
+    adminModal.addEventListener('touchend', (e) => {
+        if (e.target === adminModal) {
+            adminModal.style.display = 'none';
+        }
+    }, { passive: true });
+
+    matchModal.addEventListener('touchend', (e) => {
+        if (e.target === matchModal) {
+            matchModal.style.display = 'none';
+        }
+    }, { passive: true });
 }
 
 // Event Listeners
 function setupEventListeners() {
-    // Tab switching
+    // Tab switching with touch support
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+
+        // Add touch support for tabs
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        btn.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            btn.classList.add('touch-active');
+        }, { passive: true });
+
+        btn.addEventListener('touchend', (e) => {
+            btn.classList.remove('touch-active');
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const deltaX = Math.abs(touchEndX - touchStartX);
+            const deltaY = Math.abs(touchEndY - touchStartY);
+
+            if (deltaX < 10 && deltaY < 10) {
+                e.preventDefault();
+                switchTab(btn.dataset.tab);
+            }
+        }, { passive: false });
     });
 
     // New tournament
@@ -394,6 +451,29 @@ function createMatchCard(match, type) {
     // Allow admins to edit only
     if (isAdmin) {
         card.addEventListener('click', () => openMatchModal(match, type));
+
+        // Add touch support for match cards
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        card.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            card.classList.add('touch-active');
+        }, { passive: true });
+
+        card.addEventListener('touchend', (e) => {
+            card.classList.remove('touch-active');
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const deltaX = Math.abs(touchEndX - touchStartX);
+            const deltaY = Math.abs(touchEndY - touchStartY);
+
+            if (deltaX < 10 && deltaY < 10) {
+                e.preventDefault();
+                openMatchModal(match, type);
+            }
+        }, { passive: false });
     }
 
     const statusBadge = match.played
@@ -642,6 +722,29 @@ function createPlayoffMatchCard(match) {
     // Allow admins to edit only
     if (isAdmin) {
         card.addEventListener('click', () => openPlayoffMatchModal(match));
+
+        // Add touch support for playoff match cards
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        card.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            card.classList.add('touch-active');
+        }, { passive: true });
+
+        card.addEventListener('touchend', (e) => {
+            card.classList.remove('touch-active');
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const deltaX = Math.abs(touchEndX - touchStartX);
+            const deltaY = Math.abs(touchEndY - touchStartY);
+
+            if (deltaX < 10 && deltaY < 10) {
+                e.preventDefault();
+                openPlayoffMatchModal(match);
+            }
+        }, { passive: false });
     }
 
     const statusBadge = match.played
