@@ -34,144 +34,90 @@ function initMobileFixes() {
     setVH();
     window.addEventListener('resize', setVH);
     window.addEventListener('orientationchange', setVH);
+}
 
-    // Add touch support for all interactive elements
-    const addTouchSupport = (element, callback) => {
-        if (!element) return;
+// Helper function to add both click and touch events
+function addClickHandler(element, callback) {
+    if (!element) return;
 
-        let touchStartY = 0;
-        let touchStartX = 0;
+    let handled = false;
 
-        element.addEventListener('touchstart', (e) => {
-            touchStartY = e.touches[0].clientY;
-            touchStartX = e.touches[0].clientX;
-            element.classList.add('touch-active');
-        }, { passive: true });
-
-        element.addEventListener('touchend', (e) => {
-            element.classList.remove('touch-active');
-
-            // Check if it was a tap (not a scroll)
-            const touchEndY = e.changedTouches[0].clientY;
-            const touchEndX = e.changedTouches[0].clientX;
-            const deltaY = Math.abs(touchEndY - touchStartY);
-            const deltaX = Math.abs(touchEndX - touchStartX);
-
-            // If movement is less than 10px, consider it a tap
-            if (deltaY < 10 && deltaX < 10) {
-                e.preventDefault();
-                callback(e);
-            }
-        }, { passive: false });
-    };
-
-    // Add touch support for admin buttons
-    addTouchSupport(adminLoginBtn, () => {
-        adminModal.style.display = 'block';
-    });
-
-    addTouchSupport(adminLogoutBtn, () => {
-        adminLogout();
-    });
-
-    addTouchSupport(submitAdminBtn, () => {
-        adminLogin();
-    });
-
-    addTouchSupport(closeAdminModal, () => {
-        adminModal.style.display = 'none';
-    });
-
-    addTouchSupport(closeModal, () => {
-        matchModal.style.display = 'none';
-    });
-
-    addTouchSupport(newTournamentBtn, () => {
-        createNewTournament();
-    });
-
-    addTouchSupport(setupPlayoffsBtn, () => {
-        setupPlayoffs();
-    });
-
-    addTouchSupport(submitScoreBtn, () => {
-        submitScore();
-    });
-
-    // Handle modal background tap to close
-    adminModal.addEventListener('touchend', (e) => {
-        if (e.target === adminModal) {
-            adminModal.style.display = 'none';
+    // Handle touch events for mobile
+    element.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        if (!handled) {
+            handled = true;
+            callback(e);
+            setTimeout(() => { handled = false; }, 300);
         }
-    }, { passive: true });
+    }, { passive: false });
 
-    matchModal.addEventListener('touchend', (e) => {
-        if (e.target === matchModal) {
-            matchModal.style.display = 'none';
+    // Handle click events for desktop
+    element.addEventListener('click', (e) => {
+        if (!handled) {
+            handled = true;
+            callback(e);
+            setTimeout(() => { handled = false; }, 300);
         }
-    }, { passive: true });
+    });
 }
 
 // Event Listeners
 function setupEventListeners() {
-    // Tab switching with touch support
+    // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-
-        // Add touch support for tabs
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        btn.addEventListener('touchstart', (e) => {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-            btn.classList.add('touch-active');
-        }, { passive: true });
-
-        btn.addEventListener('touchend', (e) => {
-            btn.classList.remove('touch-active');
-            const touchEndX = e.changedTouches[0].clientX;
-            const touchEndY = e.changedTouches[0].clientY;
-            const deltaX = Math.abs(touchEndX - touchStartX);
-            const deltaY = Math.abs(touchEndY - touchStartY);
-
-            if (deltaX < 10 && deltaY < 10) {
-                e.preventDefault();
-                switchTab(btn.dataset.tab);
-            }
-        }, { passive: false });
+        addClickHandler(btn, () => switchTab(btn.dataset.tab));
     });
 
     // New tournament
-    newTournamentBtn.addEventListener('click', createNewTournament);
+    addClickHandler(newTournamentBtn, createNewTournament);
 
     // Setup playoffs
-    setupPlayoffsBtn.addEventListener('click', setupPlayoffs);
+    addClickHandler(setupPlayoffsBtn, setupPlayoffs);
 
-    // Admin
-    adminLoginBtn.addEventListener('click', () => adminModal.style.display = 'block');
-    adminLogoutBtn.addEventListener('click', adminLogout);
-    submitAdminBtn.addEventListener('click', adminLogin);
+    // Admin login button
+    addClickHandler(adminLoginBtn, () => {
+        adminModal.style.display = 'block';
+    });
 
-    // Admin modal
-    closeAdminModal.addEventListener('click', () => adminModal.style.display = 'none');
-    window.addEventListener('click', (e) => {
+    // Admin logout button
+    addClickHandler(adminLogoutBtn, adminLogout);
+
+    // Submit admin login
+    addClickHandler(submitAdminBtn, adminLogin);
+
+    // Close admin modal
+    addClickHandler(closeAdminModal, () => {
+        adminModal.style.display = 'none';
+    });
+
+    // Close match modal
+    addClickHandler(closeModal, () => {
+        matchModal.style.display = 'none';
+    });
+
+    // Submit score
+    addClickHandler(submitScoreBtn, submitScore);
+
+    // Modal background click to close
+    adminModal.addEventListener('click', (e) => {
         if (e.target === adminModal) adminModal.style.display = 'none';
+    });
+    adminModal.addEventListener('touchend', (e) => {
+        if (e.target === adminModal) adminModal.style.display = 'none';
+    });
+
+    matchModal.addEventListener('click', (e) => {
+        if (e.target === matchModal) matchModal.style.display = 'none';
+    });
+    matchModal.addEventListener('touchend', (e) => {
+        if (e.target === matchModal) matchModal.style.display = 'none';
     });
 
     // Enter key in admin password
     adminPassword.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') adminLogin();
     });
-
-    // Match modal
-    closeModal.addEventListener('click', () => matchModal.style.display = 'none');
-    window.addEventListener('click', (e) => {
-        if (e.target === matchModal) matchModal.style.display = 'none';
-    });
-
-    // Submit score
-    submitScoreBtn.addEventListener('click', submitScore);
 
     // Enter key in score inputs
     document.getElementById('player1Score').addEventListener('keypress', handleEnterKey);
@@ -450,30 +396,7 @@ function createMatchCard(match, type) {
 
     // Allow admins to edit only
     if (isAdmin) {
-        card.addEventListener('click', () => openMatchModal(match, type));
-
-        // Add touch support for match cards
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        card.addEventListener('touchstart', (e) => {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-            card.classList.add('touch-active');
-        }, { passive: true });
-
-        card.addEventListener('touchend', (e) => {
-            card.classList.remove('touch-active');
-            const touchEndX = e.changedTouches[0].clientX;
-            const touchEndY = e.changedTouches[0].clientY;
-            const deltaX = Math.abs(touchEndX - touchStartX);
-            const deltaY = Math.abs(touchEndY - touchStartY);
-
-            if (deltaX < 10 && deltaY < 10) {
-                e.preventDefault();
-                openMatchModal(match, type);
-            }
-        }, { passive: false });
+        addClickHandler(card, () => openMatchModal(match, type));
     }
 
     const statusBadge = match.played
@@ -721,30 +644,7 @@ function createPlayoffMatchCard(match) {
 
     // Allow admins to edit only
     if (isAdmin) {
-        card.addEventListener('click', () => openPlayoffMatchModal(match));
-
-        // Add touch support for playoff match cards
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        card.addEventListener('touchstart', (e) => {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-            card.classList.add('touch-active');
-        }, { passive: true });
-
-        card.addEventListener('touchend', (e) => {
-            card.classList.remove('touch-active');
-            const touchEndX = e.changedTouches[0].clientX;
-            const touchEndY = e.changedTouches[0].clientY;
-            const deltaX = Math.abs(touchEndX - touchStartX);
-            const deltaY = Math.abs(touchEndY - touchStartY);
-
-            if (deltaX < 10 && deltaY < 10) {
-                e.preventDefault();
-                openPlayoffMatchModal(match);
-            }
-        }, { passive: false });
+        addClickHandler(card, () => openPlayoffMatchModal(match));
     }
 
     const statusBadge = match.played

@@ -1192,6 +1192,26 @@ body {
 
 /* ========== MOBILE TOUCH IMPROVEMENTS ========== */
 
+/* Remove 300ms delay on touch devices */
+.btn,
+.tab-btn,
+.match-card,
+.close,
+.close-admin {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Active state feedback */
+.btn:active,
+.tab-btn:active,
+.match-card:active {
+    transform: scale(0.97);
+    opacity: 0.9;
+}
+
 /* Touch feedback for buttons */
 .btn.touch-active,
 .tab-btn.touch-active {
