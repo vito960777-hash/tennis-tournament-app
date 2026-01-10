@@ -1,11 +1,11 @@
 {
-  "name": "New Year Tournament Danang 2025",
-  "short_name": "Danang 2025",
-  "description": "Festive Tennis Tournament in Vietnam",
+  "name": "Next Gen ATP Finals Da Nang",
+  "short_name": "ATP Finals",
+  "description": "Professional Tennis Tournament",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#c41e3a",
-  "theme_color": "#c41e3a",
+  "background_color": "#0a1628",
+  "theme_color": "#0a1628",
   "orientation": "portrait-primary",
   "icons": [
     {

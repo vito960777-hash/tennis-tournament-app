@@ -282,15 +282,17 @@ function renderGroups(groups) {
 
         group.players.forEach(player => {
             const row = document.createElement('tr');
-            const diff = player.game_difference >= 0 ? `+${player.game_difference}` : player.game_difference;
+            const matchesPlayed = player.wins + player.losses;
+            const points = player.wins; // 1 point per win (Next Gen ATP Finals rules)
 
             row.innerHTML = `
                 <td>${player.name}</td>
                 <td>${player.level}</td>
+                <td>${matchesPlayed}</td>
                 <td>${player.wins}</td>
                 <td>${player.losses}</td>
                 <td>${player.games_won}-${player.games_lost}</td>
-                <td>${diff}</td>
+                <td>${points}</td>
             `;
 
             tbody.appendChild(row);
@@ -303,27 +305,41 @@ function renderGroupMatches(matches) {
     const container = document.getElementById('group-matches');
     container.innerHTML = '';
 
-    // Define rounds with time slots
+    // Define rounds with time slots (5 rounds, 1 hour each)
     const rounds = [
         {
             number: 1,
             groups: [
-                { name: 'A', time: '8:00-9:00' },
-                { name: 'B', time: '9:00-10:00' }
+                { name: 'A', time: '08:00', stage: 'Група A' },
+                { name: 'B', time: '09:00', stage: 'Група B' }
             ]
         },
         {
             number: 2,
             groups: [
-                { name: 'A', time: '10:00-11:00' },
-                { name: 'B', time: '11:00-12:00' }
+                { name: 'A', time: '10:00', stage: 'Група A' },
+                { name: 'B', time: '11:00', stage: 'Група B' }
             ]
         },
         {
             number: 3,
             groups: [
-                { name: 'A', time: '12:00-13:00' },
-                { name: 'B', time: '13:00-14:00' }
+                { name: 'A', time: '12:00', stage: 'Група A' },
+                { name: 'B', time: '13:00', stage: 'Група B' }
+            ]
+        },
+        {
+            number: 4,
+            groups: [
+                { name: 'A', time: '14:00', stage: 'Група A' },
+                { name: 'B', time: '15:00', stage: 'Група B' }
+            ]
+        },
+        {
+            number: 5,
+            groups: [
+                { name: 'A', time: '16:00', stage: 'Група A' },
+                { name: 'B', time: '17:00', stage: 'Група B' }
             ]
         }
     ];
@@ -341,7 +357,7 @@ function renderGroupMatches(matches) {
             // Filter matches for this time slot and group
             const groupMatches = matches.filter(match =>
                 match.time === groupInfo.time &&
-                match.stage === `Group ${groupInfo.name}`
+                match.stage === groupInfo.stage
             );
 
             if (groupMatches.length > 0) {
@@ -431,30 +447,44 @@ function renderSchedule(schedule) {
     if (groupMatches.length > 0) {
         const groupStageHeader = document.createElement('div');
         groupStageHeader.className = 'stage-header';
-        groupStageHeader.innerHTML = '<h2>🎄 GROUP STAGE</h2>';
+        groupStageHeader.innerHTML = '<h2>🎾 GROUP STAGE</h2>';
         container.appendChild(groupStageHeader);
 
-        // Define rounds
+        // Define rounds (5 rounds, 1 hour each)
         const rounds = [
             {
                 number: 1,
                 groups: [
-                    { name: 'A', time: '8:00-9:00' },
-                    { name: 'B', time: '9:00-10:00' }
+                    { name: 'A', time: '08:00', stage: 'Група A' },
+                    { name: 'B', time: '09:00', stage: 'Група B' }
                 ]
             },
             {
                 number: 2,
                 groups: [
-                    { name: 'A', time: '10:00-11:00' },
-                    { name: 'B', time: '11:00-12:00' }
+                    { name: 'A', time: '10:00', stage: 'Група A' },
+                    { name: 'B', time: '11:00', stage: 'Група B' }
                 ]
             },
             {
                 number: 3,
                 groups: [
-                    { name: 'A', time: '12:00-13:00' },
-                    { name: 'B', time: '13:00-14:00' }
+                    { name: 'A', time: '12:00', stage: 'Група A' },
+                    { name: 'B', time: '13:00', stage: 'Група B' }
+                ]
+            },
+            {
+                number: 4,
+                groups: [
+                    { name: 'A', time: '14:00', stage: 'Група A' },
+                    { name: 'B', time: '15:00', stage: 'Група B' }
+                ]
+            },
+            {
+                number: 5,
+                groups: [
+                    { name: 'A', time: '16:00', stage: 'Група A' },
+                    { name: 'B', time: '17:00', stage: 'Група B' }
                 ]
             }
         ];
@@ -471,12 +501,12 @@ function renderSchedule(schedule) {
 
             // Render each group in the round
             round.groups.forEach(groupInfo => {
-                const groupMatches = schedule.filter(match =>
+                const filteredMatches = schedule.filter(match =>
                     match.time === groupInfo.time &&
-                    match.stage === `Group ${groupInfo.name}`
+                    match.stage === groupInfo.stage
                 );
 
-                if (groupMatches.length > 0) {
+                if (filteredMatches.length > 0) {
                     const timeSlotDiv = document.createElement('div');
                     timeSlotDiv.className = 'schedule-time-slot';
 
@@ -488,7 +518,7 @@ function renderSchedule(schedule) {
                     const matchesDiv = document.createElement('div');
                     matchesDiv.className = 'schedule-matches';
 
-                    groupMatches.sort((a, b) => a.court - b.court).forEach(match => {
+                    filteredMatches.sort((a, b) => a.court - b.court).forEach(match => {
                         const matchCard = createMatchCard(match, match.type);
                         matchesDiv.appendChild(matchCard);
                     });
@@ -506,13 +536,14 @@ function renderSchedule(schedule) {
     if (playoffMatches.length > 0) {
         const playoffHeader = document.createElement('div');
         playoffHeader.className = 'stage-header';
-        playoffHeader.innerHTML = '<h2>⭐ PLAYOFFS</h2>';
+        playoffHeader.innerHTML = '<h2>🏆 PLAYOFFS</h2>';
         container.appendChild(playoffHeader);
 
         // Group playoff matches by time
         const playoffTimes = {
-            '14:00-15:00': [],
-            '15:00-16:00': []
+            '18:00': [],
+            '19:00': [],
+            '20:00': []
         };
 
         playoffMatches.forEach(match => {

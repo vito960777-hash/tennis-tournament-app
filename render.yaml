@@ -1,11 +1,13 @@
 services:
   - type: web
-    name: tennis-tournament
+    name: next-gen-atp-finals
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.13.0
-      - key: PORT
-        value: 10000
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        value: tennis2024

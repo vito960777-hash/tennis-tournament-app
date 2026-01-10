@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Danang 2025">
+    <meta name="apple-mobile-web-app-title" content="Next Gen ATP Finals">
     <meta name="format-detection" content="telephone=no">
-    <meta name="theme-color" content="#c41e3a">
-    <title>New Year Tournament Danang 2025</title>
+    <meta name="theme-color" content="#0a1628">
+    <title>Next Gen ATP Finals Da Nang</title>
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,8 +20,8 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <h1>🎄 New Year Tournament Danang 2025 ⛄</h1>
-                <p class="subtitle">Festive Tennis Tournament in Vietnam</p>
+                <h1>Next Gen ATP Finals Da Nang</h1>
+                <p class="subtitle">Professional Tennis Tournament</p>
             </div>
             <div class="header-buttons">
                 <button id="adminLoginBtn" class="btn btn-secondary">Admin Login</button>
@@ -51,10 +51,11 @@
                                     <tr>
                                         <th>Player</th>
                                         <th>Level</th>
+                                        <th>MP</th>
                                         <th>W</th>
                                         <th>L</th>
-                                        <th>Games</th>
-                                        <th>Diff</th>
+                                        <th>Sets</th>
+                                        <th>Pts</th>
                                     </tr>
                                 </thead>
                                 <tbody id="group-a-body">
@@ -71,10 +72,11 @@
                                     <tr>
                                         <th>Player</th>
                                         <th>Level</th>
+                                        <th>MP</th>
                                         <th>W</th>
                                         <th>L</th>
-                                        <th>Games</th>
-                                        <th>Diff</th>
+                                        <th>Sets</th>
+                                        <th>Pts</th>
                                     </tr>
                                 </thead>
                                 <tbody id="group-b-body">
@@ -144,11 +146,11 @@
                 <p id="matchPlayers"></p>
             </div>
             <div class="score-input">
-                <input type="number" id="player1Score" min="0" max="7" placeholder="0" inputmode="numeric" pattern="[0-7]">
+                <input type="number" id="player1Score" min="0" max="2" placeholder="0" inputmode="numeric" pattern="[0-2]">
                 <span class="score-separator">-</span>
-                <input type="number" id="player2Score" min="0" max="7" placeholder="0" inputmode="numeric" pattern="[0-7]">
+                <input type="number" id="player2Score" min="0" max="2" placeholder="0" inputmode="numeric" pattern="[0-2]">
             </div>
-            <p class="hint-text">Valid scores: 6-0, 6-1, 6-2, 6-3, 6-4, 7-5, 7-6 (and reverse)</p>
+            <p class="hint-text">Valid scores: 2-0, 2-1, 0-2, 1-2 (sets)</p>
             <button id="submitScoreBtn" class="btn btn-primary">Save Result</button>
         </div>
     </div>

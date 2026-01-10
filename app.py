@@ -32,17 +32,21 @@ def create_tournament():
     # Check if there are enough players
     all_players = player_db.get_all_players()
 
-    # If less than 8 players, create defaults
-    if len(all_players) < 8:
+    # If less than 10 players, create defaults
+    if len(all_players) < 10:
         default_players = [
+            # Group A
+            ("Masha", 4),
             ("Oleksandr", 4),
+            ("Yaroslav", 3.5),
+            ("Vova", 3.5),
+            ("Alex", 3.5),
+            # Group B
             ("Igor", 4),
-            ("Viktor", 4),
-            ("Oleksiy", 4),
-            ("Oleg", 3),
-            ("Vito", 3),
-            ("Yaroslav", 3),
-            ("Princeton", 3),
+            ("Jonathan", 4),
+            ("Oleg", 3.5),
+            ("Vito", 3.5),
+            ("Florian", 3.5),
         ]
 
         for name, level in default_players:
@@ -51,15 +55,15 @@ def create_tournament():
 
         all_players = player_db.get_all_players()
 
-    # Take top-8 players
-    top_8 = all_players[:8]
+    # Take top-10 players
+    top_10 = all_players[:10]
 
     # Create tournament
     tournament = Tournament()
     tournament.players = []
 
     # Add players to tournament
-    for i, player_data in enumerate(top_8):
+    for i, player_data in enumerate(top_10):
         player = Player(
             name=player_data['name'],
             seed=i+1,
@@ -68,7 +72,7 @@ def create_tournament():
         tournament.players.append(player)
 
     # Update tournament participation stats
-    player_names = [p['name'] for p in top_8]
+    player_names = [p['name'] for p in top_10]
     player_db.update_tournament_stats(player_names)
 
     # Draw groups and create schedule
@@ -262,15 +266,15 @@ def submit_match():
     data = request.json
     player1_name = data.get('player1')
     player2_name = data.get('player2')
-    score = data.get('score')  # Format: "6-4"
+    score = data.get('score')  # Format: "2-0" or "2-1" (sets)
     match_type = data.get('type', 'group')
 
     try:
-        p1_games, p2_games = map(int, score.split('-'))
+        p1_sets, p2_sets = map(int, score.split('-'))
 
-        # Validate score
-        if not tournament._is_valid_tennis_score(p1_games, p2_games):
-            return jsonify({'error': 'Invalid tennis score'}), 400
+        # Validate score (Next Gen format: 2-0, 2-1, 0-2, 1-2)
+        if not tournament._is_valid_tennis_score(p1_sets, p2_sets):
+            return jsonify({'error': 'Invalid score. Valid: 2-0, 2-1, 0-2, 1-2'}), 400
 
         # Find match
         match_found = False
@@ -282,7 +286,7 @@ def submit_match():
                         match.player2.name == player2_name):
 
                         # Save new result
-                        match.play(p1_games, p2_games)
+                        match.play(p1_sets, p2_sets)
                         match_found = True
                         break
                 if match_found:
@@ -338,14 +342,14 @@ def submit_playoff_match():
     data = request.json
     player1_name = data.get('player1')
     player2_name = data.get('player2')
-    score = data.get('score')
+    score = data.get('score')  # Format: "2-0" or "2-1" (sets)
     playoff_type = data.get('playoff_type')  # 'semifinal', 'final', 'third_place'
 
     try:
-        p1_games, p2_games = map(int, score.split('-'))
+        p1_sets, p2_sets = map(int, score.split('-'))
 
-        if not tournament._is_valid_tennis_score(p1_games, p2_games):
-            return jsonify({'error': 'Invalid tennis score'}), 400
+        if not tournament._is_valid_tennis_score(p1_sets, p2_sets):
+            return jsonify({'error': 'Invalid score. Valid: 2-0, 2-1, 0-2, 1-2'}), 400
 
         # Find corresponding match
         if playoff_type == 'semifinal':
@@ -353,7 +357,7 @@ def submit_playoff_match():
                 if (match.player1.name == player1_name and
                     match.player2.name == player2_name):
 
-                    match.play(p1_games, p2_games)
+                    match.play(p1_sets, p2_sets)
 
                     # If both semifinals are played, create/update final
                     if all(m.score is not None for m in tournament.scheduled_semifinals):
@@ -377,10 +381,10 @@ def submit_playoff_match():
                                 tournament.scheduled_third_place.winner = None
 
                         tournament.scheduled_final = ScheduledMatch(
-                            winners[0], winners[1], "15:00-16:00", 1, 0, "Final"
+                            winners[0], winners[1], "20:00", 1, 0, "Final"
                         )
                         tournament.scheduled_third_place = ScheduledMatch(
-                            losers[0], losers[1], "15:00-16:00", 2, 0, "3rd Place Match"
+                            losers[0], losers[1], "19:00", 1, 0, "3rd Place Match"
                         )
                         tournament.final = tournament.scheduled_final
                         tournament.third_place_match = tournament.scheduled_third_place
@@ -391,7 +395,7 @@ def submit_playoff_match():
             if (tournament.scheduled_final.player1.name == player1_name and
                 tournament.scheduled_final.player2.name == player2_name):
 
-                tournament.scheduled_final.play(p1_games, p2_games)
+                tournament.scheduled_final.play(p1_sets, p2_sets)
 
                 return jsonify({'success': True, 'message': 'Final completed!'})
 
@@ -399,7 +403,7 @@ def submit_playoff_match():
             if (tournament.scheduled_third_place.player1.name == player1_name and
                 tournament.scheduled_third_place.player2.name == player2_name):
 
-                tournament.scheduled_third_place.play(p1_games, p2_games)
+                tournament.scheduled_third_place.play(p1_sets, p2_sets)
                 return jsonify({'success': True, 'message': 'Third place match completed!'})
 
         return jsonify({'error': 'Match not found'}), 404

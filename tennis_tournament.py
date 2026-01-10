@@ -1,6 +1,6 @@
 """
-Програма для проведення тенісного турніру в стилі ATP Finals
-Кожен матч - один сет до 6 геймів з тайбрейком
+Програма для проведення тенісного турніру в стилі Next Gen ATP Finals
+Кожен матч - два сети до 4 геймів, при 1-1 тайбрейк до 10
 """
 import random
 from typing import List, Optional
@@ -141,42 +141,51 @@ class Group:
 
     def _create_matches(self):
         """Створює матчі раунд-робін (кожен з кожним) у правильному порядку для розкладу"""
-        # Для групи з 4 гравцями [P0, P1, P2, P3] створюємо матчі так,
-        # щоб у кожному раунді (по 2 матчі) всі гравці були різні:
-        # Раунд 1: P0 vs P2, P1 vs P3
-        # Раунд 2: P0 vs P3, P1 vs P2
-        # Раунд 3: P0 vs P1, P2 vs P3
-
-        if len(self.players) == 4:
-            p0, p1, p2, p3 = self.players
-
-            # Спеціальний порядок для групи з Vito
+        if len(self.players) == 5:
+            p0, p1, p2, p3, p4 = self.players
             player_names = [p.name for p in self.players]
+
+            # Спеціальний розклад для групи B (з Vito)
+            # Vito (p3) грає раунди 1, 2, відпочиває раунд 3, грає раунди 4, 5
+            # Перша гра Vito - проти Oleg
+            # Порядок: Igor (0), Jonathan (1), Oleg (2), Vito (3), Florian (4)
             if "Vito" in player_names:
-                # Порядок: ["Oleksandr", "Viktor", "Vito", "Yaroslav"]
-                # p0 = Oleksandr, p1 = Viktor, p2 = Vito, p3 = Yaroslav
-                # Раунд 1: Viktor vs Vito, Oleksandr vs Yaroslav
-                self.matches.append(Match(p1, p2))
-                self.matches.append(Match(p0, p3))
-                # Раунд 2: Vito vs Yaroslav, Oleksandr vs Viktor
-                self.matches.append(Match(p2, p3))
-                self.matches.append(Match(p0, p1))
-                # Раунд 3: Vito vs Oleksandr, Viktor vs Yaroslav
-                self.matches.append(Match(p2, p0))
-                self.matches.append(Match(p1, p3))
+                # Раунд 1: Oleg vs Vito, Igor vs Jonathan (Florian відпочиває)
+                self.matches.append(Match(p2, p3))  # Oleg vs Vito
+                self.matches.append(Match(p0, p1))  # Igor vs Jonathan
+                # Раунд 2: Jonathan vs Vito, Oleg vs Florian (Igor відпочиває)
+                self.matches.append(Match(p1, p3))  # Jonathan vs Vito
+                self.matches.append(Match(p2, p4))  # Oleg vs Florian
+                # Раунд 3: Igor vs Florian, Jonathan vs Oleg (Vito відпочиває)
+                self.matches.append(Match(p0, p4))  # Igor vs Florian
+                self.matches.append(Match(p1, p2))  # Jonathan vs Oleg
+                # Раунд 4: Igor vs Vito, Jonathan vs Florian (Oleg відпочиває)
+                self.matches.append(Match(p0, p3))  # Igor vs Vito
+                self.matches.append(Match(p1, p4))  # Jonathan vs Florian
+                # Раунд 5: Vito vs Florian, Igor vs Oleg (Jonathan відпочиває)
+                self.matches.append(Match(p3, p4))  # Vito vs Florian
+                self.matches.append(Match(p0, p2))  # Igor vs Oleg
             else:
-                # Стандартний порядок для групи B
-                # Раунд 1
-                self.matches.append(Match(p0, p2))
-                self.matches.append(Match(p1, p3))
-                # Раунд 2
-                self.matches.append(Match(p0, p3))
-                self.matches.append(Match(p1, p2))
-                # Раунд 3
-                self.matches.append(Match(p0, p1))
-                self.matches.append(Match(p2, p3))
+                # Спеціальний розклад для групи A
+                # Masha vs Oleksandr грають в раунді 2 о 10:00
+                # Порядок: Masha (0), Oleksandr (1), Yaroslav (2), Vova (3), Alex (4)
+                # Раунд 1: Oleksandr vs Vova, Yaroslav vs Alex (Masha відпочиває)
+                self.matches.append(Match(p1, p3))  # Oleksandr vs Vova
+                self.matches.append(Match(p2, p4))  # Yaroslav vs Alex
+                # Раунд 2: Masha vs Oleksandr, Yaroslav vs Vova (Alex відпочиває)
+                self.matches.append(Match(p0, p1))  # Masha vs Oleksandr
+                self.matches.append(Match(p2, p3))  # Yaroslav vs Vova
+                # Раунд 3: Masha vs Yaroslav, Vova vs Alex (Oleksandr відпочиває)
+                self.matches.append(Match(p0, p2))  # Masha vs Yaroslav
+                self.matches.append(Match(p3, p4))  # Vova vs Alex
+                # Раунд 4: Masha vs Vova, Oleksandr vs Alex (Yaroslav відпочиває)
+                self.matches.append(Match(p0, p3))  # Masha vs Vova
+                self.matches.append(Match(p1, p4))  # Oleksandr vs Alex
+                # Раунд 5: Masha vs Alex, Oleksandr vs Yaroslav (Vova відпочиває)
+                self.matches.append(Match(p0, p4))  # Masha vs Alex
+                self.matches.append(Match(p1, p2))  # Oleksandr vs Yaroslav
         else:
-            # Якщо кількість гравців не 4, використовуємо стандартний метод
+            # Для інших кількостей гравців використовуємо стандартний метод
             for i in range(len(self.players)):
                 for j in range(i + 1, len(self.players)):
                     self.matches.append(Match(self.players[i], self.players[j]))
@@ -195,13 +204,13 @@ class Group:
         print(f"\n{'='*60}")
         print(f"Група {self.name}")
         print(f"{'='*60}")
-        print(f"{'Гравець':<25} {'В':<5} {'П':<5} {'Геймі':<10} {'Різниця'}")
+        print(f"{'Гравець':<20} {'В':<5} {'П':<5} {'Сети':<10} {'Різниця'}")
         print(f"{'-'*60}")
 
         for player in self.get_standings():
-            games_str = f"{player.games_won}-{player.games_lost}"
+            sets_str = f"{player.games_won}-{player.games_lost}"
             diff = f"+{player.game_difference()}" if player.game_difference() >= 0 else str(player.game_difference())
-            print(f"{player.name:<25} {player.wins:<5} {player.losses:<5} {games_str:<10} {diff}")
+            print(f"{player.name:<20} {player.wins:<5} {player.losses:<5} {sets_str:<10} {diff}")
 
 
 class Tournament:
@@ -219,19 +228,23 @@ class Tournament:
 
     def setup_players(self):
         """Встановлює учасників турніру"""
-        print("\n🎾 Ласкаво просимо до ATP Finals Tournament Generator! 🎾\n")
-        print("Учасники турніру (відсортовані за рівнем гри):\n")
+        print("\n🎾 Ласкаво просимо до Next Gen ATP Finals Tournament! 🎾\n")
+        print("Учасники турніру:\n")
 
-        # Визначені учасники з рівнями гри
+        # 10 учасників для 2 груп по 5
         participants = [
-            ("Олександр", 4.0),
-            ("Ігорь", 4.0),
-            ("Марія", 4.0),
-            ("Олексій", 3.75),
-            ("Олег", 3.5),
-            ("Віто", 3.5),
-            ("Ярослав", 3.5),
-            ("Віктор", 3.0),
+            # Група А (колишня група Б)
+            ("Masha", 4.0),
+            ("Oleksandr", 4.0),
+            ("Yaroslav", 3.5),
+            ("Vova", 3.5),
+            ("Alex", 3.5),
+            # Група Б (колишня група А)
+            ("Igor", 4.0),
+            ("Jonathan", 4.0),
+            ("Oleg", 3.5),
+            ("Vito", 3.5),
+            ("Florian", 3.5),
         ]
 
         for i, (name, level) in enumerate(participants):
@@ -245,17 +258,23 @@ class Tournament:
         group_a = self.groups[0]
         group_b = self.groups[1]
 
-        # Розклад: 3 раунди для кожної групи, по 2 матчі в раунді
+        # Розклад: 5 раундів для кожної групи, по 2 матчі в раунді
+        # Групи чергуються для справедливого відпочинку
+        # Кожен часовий слот = 1 година
         schedule = {
             "A": [
-                ("8:00-9:00", [1, 2]),    # Раунд 1, група А
-                ("10:00-11:00", [1, 2]),  # Раунд 2, група А
-                ("12:00-13:00", [1, 2]),  # Раунд 3, група А
+                ("08:00", [1, 2]),    # Раунд 1, група А
+                ("10:00", [1, 2]),    # Раунд 2, група А
+                ("12:00", [1, 2]),    # Раунд 3, група А
+                ("14:00", [1, 2]),    # Раунд 4, група А
+                ("16:00", [1, 2]),    # Раунд 5, група А
             ],
             "B": [
-                ("9:00-10:00", [1, 2]),   # Раунд 1, група Б
-                ("11:00-12:00", [1, 2]),  # Раунд 2, група Б
-                ("13:00-14:00", [1, 2]),  # Раунд 3, група Б
+                ("09:00", [1, 2]),    # Раунд 1, група Б
+                ("11:00", [1, 2]),    # Раунд 2, група Б
+                ("13:00", [1, 2]),    # Раунд 3, група Б
+                ("15:00", [1, 2]),    # Раунд 4, група Б
+                ("17:00", [1, 2]),    # Раунд 5, група Б
             ]
         }
 
@@ -271,7 +290,7 @@ class Tournament:
                         time_slot,
                         court,
                         round_idx,
-                        f"Group {group_a.name}"
+                        f"Група A"
                     )
                     group_a.scheduled_matches.append(scheduled_match)
 
@@ -287,7 +306,7 @@ class Tournament:
                         time_slot,
                         court,
                         round_idx,
-                        f"Group {group_b.name}"
+                        f"Група B"
                     )
                     group_b.scheduled_matches.append(scheduled_match)
 
@@ -296,9 +315,11 @@ class Tournament:
         print("\n" + "="*70)
         print("📅 ПОВНИЙ РОЗКЛАД ТУРНІРУ 📅")
         print("="*70)
+        print("Формат: 2 сети до 4 геймів, при 1:1 тайбрейк до 10")
+        print("Кожен матч - 1 година")
 
         # Груповий етап
-        print("\n🎾 ГРУПОВИЙ ЕТАП")
+        print("\n🎾 ГРУПОВИЙ ЕТАП (20 матчів)")
         print("-"*70)
 
         all_scheduled_matches = []
@@ -312,7 +333,9 @@ class Tournament:
                 time_slots[match.time] = []
             time_slots[match.time].append(match)
 
-        time_order = ["8:00-9:00", "9:00-10:00", "10:00-11:00", "11:00-12:00", "12:00-13:00", "13:00-14:00"]
+        # Порядок часів для 10 раундів (по 1 годині кожен)
+        time_order = ["08:00", "09:00", "10:00", "11:00", "12:00",
+                      "13:00", "14:00", "15:00", "16:00", "17:00"]
 
         for time in time_order:
             if time in time_slots:
@@ -321,15 +344,16 @@ class Tournament:
                 for match in matches:
                     print(f"   Корт {match.court} | {match.stage} | {match.player1.name} vs {match.player2.name}")
 
-        # Плей-офф розклад (додамо потім)
+        # Плей-офф розклад
         print("\n🏆 ПЛЕЙ-ОФФ")
         print("-"*70)
-        print("\n⏰ 14:00-15:00")
-        print("   Корт 1 | Півфінал 1 | Переможець групи A vs 2-е місце групи B")
-        print("   Корт 2 | Півфінал 2 | Переможець групи B vs 2-е місце групи A")
-        print("\n⏰ 15:00-16:00")
-        print("   Корт 1 | Фінал | Переможці півфіналів")
-        print("   Корт 2 | Матч за 3 місце | Переможені в півфіналах")
+        print("\n⏰ 18:00 - Півфінали")
+        print("   Корт 1 | Півфінал 1 | 1-е місце групи A vs 2-е місце групи B")
+        print("   Корт 2 | Півфінал 2 | 1-е місце групи B vs 2-е місце групи A")
+        print("\n⏰ 19:00 - Матч за 3 місце")
+        print("   Корт 1 | Переможені в півфіналах")
+        print("\n⏰ 20:00 - ФІНАЛ")
+        print("   Корт 1 | Переможці півфіналів")
         print("="*70)
 
     def draw_groups(self):
@@ -337,11 +361,13 @@ class Tournament:
         print("\n" + "="*60)
         print("ЖЕРЕБКУВАННЯ ГРУП")
         print("="*60)
-        print("\nФіксований розподіл гравців по групах\n")
+        print("\nФіксований розподіл гравців по групах (по 5 гравців)\n")
 
-        # Фіксовані групи
-        group_a_names = ["Oleksandr", "Viktor", "Vito", "Yaroslav"]
-        group_b_names = ["Igor", "Oleksiy", "Oleg", "Princeton"]
+        # Фіксовані групи по 5 гравців (групи поміняні місцями)
+        # Група А: Маша, Олександр, Ярослав, Вова, Алекс
+        # Група Б: Ігор, Джонатан, Олег, Віто, Флоріан
+        group_a_names = ["Masha", "Oleksandr", "Yaroslav", "Vova", "Alex"]
+        group_b_names = ["Igor", "Jonathan", "Oleg", "Vito", "Florian"]
 
         # Розподіляємо гравців по групах у заданому порядку
         group_a_players = []
@@ -367,11 +393,11 @@ class Tournament:
         ]
 
         print("📋 Група A:")
-        for p in sorted(group_a_players, key=lambda x: -x.level):
+        for p in group_a_players:
             print(f"   • {p.name} (рівень {p.level})")
 
         print("\n📋 Група B:")
-        for p in sorted(group_b_players, key=lambda x: -x.level):
+        for p in group_b_players:
             print(f"   • {p.name} (рівень {p.level})")
 
         # Показуємо баланс груп за рівнем
@@ -386,7 +412,7 @@ class Tournament:
         print("\n" + "="*70)
         print("ГРУПОВИЙ ЕТАП")
         print("="*70)
-        print("(Кожен матч - один сет до 6 геймів з тайбрейком)")
+        print("(Формат: 2 сети до 4 геймів, при 1:1 тайбрейк до 10)")
 
         # Об'єднуємо всі матчі з обох груп і сортуємо за часом
         all_matches = []
@@ -394,7 +420,8 @@ class Tournament:
             all_matches.extend(group.scheduled_matches)
 
         # Групуємо матчі за часовими слотами
-        time_order = ["8:00-9:00", "9:00-10:00", "10:00-11:00", "11:00-12:00", "12:00-13:00", "13:00-14:00"]
+        time_order = ["08:00", "09:00", "10:00", "11:00", "12:00",
+                      "13:00", "14:00", "15:00", "16:00", "17:00"]
         time_slots = {time: [] for time in time_order}
 
         for match in all_matches:
@@ -422,16 +449,16 @@ class Tournament:
 
                 while True:
                     try:
-                        score = input(f"Введіть рахунок геймів (формат: X-Y, наприклад 6-4 або 7-6): ").strip()
-                        p1_games, p2_games = map(int, score.split('-'))
+                        score = input(f"Введіть рахунок по сетах (формат: X-Y, наприклад 2-0 або 2-1): ").strip()
+                        p1_sets, p2_sets = map(int, score.split('-'))
 
-                        if self._is_valid_tennis_score(p1_games, p2_games):
-                            match.play(p1_games, p2_games)
+                        if self._is_valid_tennis_score(p1_sets, p2_sets):
+                            match.play(p1_sets, p2_sets)
                             print(f"✅ Результат: {match}")
                             break
                         else:
-                            print("Некоректний теннісний рахунок!")
-                            print("Валідні рахунки: 6-0, 6-1, 6-2, 6-3, 6-4, 7-5, 7-6 (і навпаки)")
+                            print("Некоректний рахунок!")
+                            print("Валідні рахунки: 2-0, 2-1, 0-2, 1-2")
                     except (ValueError, IndexError):
                         print("Неправильний формат! Використовуйте формат X-Y")
 
@@ -447,23 +474,19 @@ class Tournament:
         self.groups[0].display_standings()
         self.groups[1].display_standings()
 
-    def _is_valid_tennis_score(self, games1: int, games2: int) -> bool:
-        """Перевіряє, чи є рахунок валідним теннісним рахунком для одного сету"""
-        if games1 < 0 or games2 < 0:
+    def _is_valid_tennis_score(self, sets1: int, sets2: int) -> bool:
+        """Перевіряє, чи є рахунок валідним для двосетового матчу (Next Gen формат)
+
+        Формат: 2 сети до 4 геймів, при 1:1 тайбрейк до 10
+        Можливі рахунки: 2-0, 2-1, 0-2, 1-2
+        """
+        if sets1 < 0 or sets2 < 0:
             return False
 
-        # Виграш 6-0, 6-1, 6-2, 6-3, 6-4
-        if games1 == 6 and games2 <= 4:
+        # Один гравець виграв 2 сети
+        if sets1 == 2 and sets2 in [0, 1]:
             return True
-        if games2 == 6 and games1 <= 4:
-            return True
-
-        # Виграш 7-5
-        if (games1 == 7 and games2 == 5) or (games2 == 7 and games1 == 5):
-            return True
-
-        # Виграш 7-6 (тайбрейк)
-        if (games1 == 7 and games2 == 6) or (games2 == 7 and games1 == 6):
+        if sets2 == 2 and sets1 in [0, 1]:
             return True
 
         return False
@@ -486,13 +509,13 @@ class Tournament:
         print(f"   Група B: {b1.name} (1-е місце), {b2.name} (2-е місце)")
 
         # Перехресні півфінали (переможець групи А грає з другим місцем групи Б і навпаки)
-        sf1 = ScheduledMatch(a1, b2, "14:00-15:00", 1, 0, "Півфінал 1")
-        sf2 = ScheduledMatch(b1, a2, "14:00-15:00", 2, 0, "Півфінал 2")
+        sf1 = ScheduledMatch(a1, b2, "18:00", 1, 0, "Півфінал 1")
+        sf2 = ScheduledMatch(b1, a2, "18:00", 2, 0, "Півфінал 2")
 
         self.scheduled_semifinals = [sf1, sf2]
         self.semifinals = [sf1, sf2]  # Зберігаємо для сумісності
 
-        print(f"\n🎾 Півфінали (14:00-15:00):")
+        print(f"\n🎾 Півфінали (18:00):")
         print(f"   Корт 1 - Півфінал 1: {sf1.player1.name} vs {sf1.player2.name}")
         print(f"   Корт 2 - Півфінал 2: {sf2.player1.name} vs {sf2.player2.name}")
 
@@ -500,7 +523,7 @@ class Tournament:
         """Проводить плей-офф матчі згідно з розкладом"""
         # ПІВФІНАЛИ
         print("\n" + "="*70)
-        print("⏰ 14:00-15:00 - ПІВФІНАЛИ")
+        print("⏰ 18:00 - ПІВФІНАЛИ")
         print("="*70)
 
         winners = []
@@ -516,11 +539,11 @@ class Tournament:
 
             while True:
                 try:
-                    score = input(f"Введіть рахунок (формат: X-Y): ").strip()
-                    p1_games, p2_games = map(int, score.split('-'))
+                    score = input(f"Введіть рахунок по сетах (2-0, 2-1, 0-2, 1-2): ").strip()
+                    p1_sets, p2_sets = map(int, score.split('-'))
 
-                    if self._is_valid_tennis_score(p1_games, p2_games):
-                        match.play(p1_games, p2_games)
+                    if self._is_valid_tennis_score(p1_sets, p2_sets):
+                        match.play(p1_sets, p2_sets)
                         print(f"✅ Результат: {match}")
                         print(f"🏆 Переможець: {match.winner.name}")
 
@@ -529,58 +552,58 @@ class Tournament:
                         losers.append(loser)
                         break
                     else:
-                        print("Некоректний теннісний рахунок!")
+                        print("Некоректний рахунок! Валідні: 2-0, 2-1, 0-2, 1-2")
                 except (ValueError, IndexError):
                     print("Неправильний формат! Використовуйте формат X-Y")
 
-        # ФІНАЛ та МАТЧ ЗА 3 МІСЦЕ
+        # МАТЧ ЗА 3 МІСЦЕ
         print("\n" + "="*70)
-        print("⏰ 15:00-16:00 - ФІНАЛ та МАТЧ ЗА 3 МІСЦЕ")
+        print("⏰ 19:00 - МАТЧ ЗА 3 МІСЦЕ")
         print("="*70)
 
         # Створюємо scheduled матчі
-        self.scheduled_final = ScheduledMatch(winners[0], winners[1], "15:00-16:00", 1, 0, "Фінал")
-        self.scheduled_third_place = ScheduledMatch(losers[0], losers[1], "15:00-16:00", 2, 0, "Матч за 3 місце")
-
-        self.final = self.scheduled_final
+        self.scheduled_third_place = ScheduledMatch(losers[0], losers[1], "19:00", 1, 0, "Матч за 3 місце")
         self.third_place_match = self.scheduled_third_place
 
-        # Показуємо обидва матчі
-        print(f"Корт 1 | Фінал | {self.scheduled_final.player1.name} vs {self.scheduled_final.player2.name}")
-        print(f"Корт 2 | Матч за 3 місце | {self.scheduled_third_place.player1.name} vs {self.scheduled_third_place.player2.name}")
-
         # Матч за 3 місце
-        print(f"\n🥉 Корт 2 - Матч за 3 місце: {self.scheduled_third_place.player1.name} vs {self.scheduled_third_place.player2.name}")
+        print(f"\n🥉 {self.scheduled_third_place.player1.name} vs {self.scheduled_third_place.player2.name}")
 
         while True:
             try:
-                score = input(f"Введіть рахунок (формат: X-Y): ").strip()
-                p1_games, p2_games = map(int, score.split('-'))
+                score = input(f"Введіть рахунок по сетах (2-0, 2-1, 0-2, 1-2): ").strip()
+                p1_sets, p2_sets = map(int, score.split('-'))
 
-                if self._is_valid_tennis_score(p1_games, p2_games):
-                    self.scheduled_third_place.play(p1_games, p2_games)
+                if self._is_valid_tennis_score(p1_sets, p2_sets):
+                    self.scheduled_third_place.play(p1_sets, p2_sets)
                     print(f"✅ Результат: {self.scheduled_third_place}")
                     print(f"🥉 3 місце: {self.scheduled_third_place.winner.name}")
                     break
                 else:
-                    print("Некоректний теннісний рахунок!")
+                    print("Некоректний рахунок! Валідні: 2-0, 2-1, 0-2, 1-2")
             except (ValueError, IndexError):
                 print("Неправильний формат! Використовуйте формат X-Y")
 
-        # Фінал
-        print(f"\n🏆 Корт 1 - ФІНАЛ: {self.scheduled_final.player1.name} vs {self.scheduled_final.player2.name}")
+        # ФІНАЛ
+        print("\n" + "="*70)
+        print("⏰ 20:00 - ФІНАЛ")
+        print("="*70)
+
+        self.scheduled_final = ScheduledMatch(winners[0], winners[1], "20:00", 1, 0, "Фінал")
+        self.final = self.scheduled_final
+
+        print(f"\n🏆 ФІНАЛ: {self.scheduled_final.player1.name} vs {self.scheduled_final.player2.name}")
 
         while True:
             try:
-                score = input(f"Введіть рахунок (формат: X-Y): ").strip()
-                p1_games, p2_games = map(int, score.split('-'))
+                score = input(f"Введіть рахунок по сетах (2-0, 2-1, 0-2, 1-2): ").strip()
+                p1_sets, p2_sets = map(int, score.split('-'))
 
-                if self._is_valid_tennis_score(p1_games, p2_games):
-                    self.scheduled_final.play(p1_games, p2_games)
+                if self._is_valid_tennis_score(p1_sets, p2_sets):
+                    self.scheduled_final.play(p1_sets, p2_sets)
                     print(f"✅ Результат: {self.scheduled_final}")
                     break
                 else:
-                    print("Некоректний теннісний рахунок!")
+                    print("Некоректний рахунок! Валідні: 2-0, 2-1, 0-2, 1-2")
             except (ValueError, IndexError):
                 print("Неправильний формат! Використовуйте формат X-Y")
 
